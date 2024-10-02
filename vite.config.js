@@ -7,11 +7,17 @@ export default defineConfig({
   server: {
     port: 6500,
     proxy: {
-      '/proxy': {
+      '/cms-api': {
         target: 'https://us.api.opentext.com',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/proxy/, "")
+        rewrite: (path) => path.replace(/^\/cms-api/, "")
+      },
+      '/css-api': {
+        target: 'https://css.us.api.opentext.com',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/css-api/, "")
       }
     }
   }
