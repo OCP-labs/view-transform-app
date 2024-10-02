@@ -1,35 +1,68 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import { useAuth } from 'react-oidc-context';
+import {
+  Alert, Box, CircularProgress
+} from '@mui/material';
+import { Home } from './Home';
+import { Header } from './Header';
+import './styles/App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const {
+    activeNavigator,
+    error,
+    isAuthenticated,
+    isLoading,
+    signinRedirect,
+  } = useAuth();
+  const [isAppLoaded, setIsAppLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        signinRedirect();
+      } else if (!isAppLoaded && isAuthenticated) {
+        setIsAppLoaded(true);
+      }
+    }
+  }, [isAuthenticated, isLoading, isAppLoaded]);
+
+  switch (activeNavigator) {
+    case 'signoutRedirect':
+      return (
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+          <CircularProgress sx={{ display: "flex", justifyContent: "center", alignItems: "center" }} />
+        </Box>
+      );
+    default:
+  }
+
+  if (error) {
+    return (
+      <div>
+        <Alert severity="error">
+          Authentication error:
+          {' '}
+          {error.message}
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!isAppLoaded) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Header />
+      <Home />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
