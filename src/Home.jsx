@@ -6,7 +6,6 @@ import { createPublicationBody } from "./utilities/createPublicationBody";
 
 export const Home = () => {
   const { user } = useAuth();
-  const [ sampleFiles, setSampleFiles ] = useState();
   const [ publicationData, setPublicationData ] = useState();
 
   const handleFileSelection = async(e) => {
@@ -49,7 +48,7 @@ export const Home = () => {
             body: JSON.stringify(publicationBodyJson)
         };
         // TODO: change cms-api name
-        const response = await fetch('cms-api/publication/api/v1/publications', requestOptions);
+        const response = await fetch('api/publication/api/v1/publications', requestOptions);
         const responseJson = await response.json();
         if (!responseJson.id) {
             throw new Error("Publication failed");
@@ -65,7 +64,7 @@ export const Home = () => {
   const getPublicationStatus = async(publicationId, attempts) => {
     try {
         const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
-        const response = await fetch(`cms-api/publication/api/v1/publications/${publicationId}?embed=page_links`, requestOptions);
+        const response = await fetch(`api/publication/api/v1/publications/${publicationId}?embed=page_links`, requestOptions);
         const responseJson = await response.json();
 
         if (responseJson.status === "Complete") {
