@@ -1,16 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useAuth } from 'react-oidc-context';
-import { Box, Button } from "@mui/material";
+import { Box, Button, CircularProgress, IconButton } from "@mui/material";
 import Grid from '@mui/material/Grid2';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { createPublicationBody } from "./utilities/createPublicationBody";
+import { Viewer } from "./Viewer";
 
 export const Home = () => {
   const { user } = useAuth();
   const [ publicationData, setPublicationData ] = useState();
+  const [ viewerDisplay, setViewerDisplay ] = useState("none");
+  const [ selectedFile, setSelectedFile ] = useState();
+  const [ publicationId, setPublicationId ] = useState();
+  const [ loading, setLoading ] = useState(false);
 
   const handleFileSelection = async(e) => {
     if (e.target.files[0]) {
         const file = e.target.files[0];
+        setLoading(true);
+        setSelectedFile(file);
         await uploadFile(file);
     }
     e.target.value = null;
@@ -33,6 +41,7 @@ export const Home = () => {
         await addPublication(publicationBody);
     } catch(error) {
         console.log(error);
+        setLoading(false);
     }
   }
 
@@ -47,21 +56,28 @@ export const Home = () => {
             },
             body: JSON.stringify(publicationBodyJson)
         };
-        // TODO: change cms-api name
         const response = await fetch('api/publication/api/v1/publications', requestOptions);
         const responseJson = await response.json();
         if (!responseJson.id) {
             throw new Error("Publication failed");
         } else {
+            setPublicationId(responseJson.id);
+        }
+        /*
+        } else {
             const attempts = 1;
             return await getPublicationStatus(responseJson.id, attempts);
         }
+        */
     } catch(error) {
         console.log(error);
+    } finally {
+        setLoading(false);
     }
   }
 
   const getPublicationStatus = async(publicationId, attempts) => {
+    setLoading(true);
     try {
         const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
         const response = await fetch(`api/publication/api/v1/publications/${publicationId}?embed=page_links`, requestOptions);
@@ -70,6 +86,8 @@ export const Home = () => {
         if (responseJson.status === "Complete") {
             setPublicationData(responseJson);
             console.log(responseJson);
+            setLoading(false);
+            setViewerDisplay("block");
         } else if (responseJson.status === "Failed") {
             throw new Error("Publication failed");
         } else {
@@ -80,6 +98,8 @@ export const Home = () => {
         }
     } catch(error) {
         console.log(error);
+    } finally {
+        setLoading(false);
     }
   }
 
@@ -91,13 +111,30 @@ export const Home = () => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <Grid container spacing={2} minHeight={160}>
+      <Grid container spacing={2} sx={{ mt: "2rem" }}>
         <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
           <Button variant="contained" component="label"
           >
             Upload file
             <input type="file" hidden onChange={handleFileSelection} />
           </Button>
+        </Grid>
+        <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
+            {loading && <CircularProgress />}
+            {selectedFile && !loading && 
+                <>
+                    <Box sx={{ display: "inline-flex" }}>{selectedFile.name}</Box>
+                    <IconButton 
+                        sx={{ display: "inline-flex" }} 
+                        onClick={() => getPublicationStatus(publicationId, 1)}
+                    >
+                        <VisibilityIcon />
+                    </IconButton>
+                </>
+            }
+        </Grid>
+        <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
+            <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} />
         </Grid>
       </Grid>
     </Box>
