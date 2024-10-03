@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from 'react-oidc-context';
+import { Box } from "@mui/material";
 import Grid from '@mui/material/Grid2';
 import * as bravaTools from "./utilities/bravaTools";
 
@@ -10,23 +11,23 @@ export const Viewer = (props) => {
     const [ bravaApi, setBravaApi ] = useState();
     const { user } = useAuth();
 
-    function onBravaReady(e) {
-      window.api = window[e.detail];
-      setBravaApi(window.api);
-      console.log(e.detail);
+    const onBravaReady = (e) => {
+        window.api = window[e.detail];
+        setBravaApi(window.api);
+        console.log(e.detail);
     }
 
     const loadViewer = useCallback(async () => {
-      const requestOptions = { method: 'GET' };
-      const response = await fetch('api/viewer/api/v1/viewers/brava-view-1.x/loader', requestOptions);
-      const script = document.createElement('script');
-      script.src = response.url;
-      document.body.appendChild(script);
-    // eslint-disable-next-line
-    }, []);
+        const requestOptions = { method: 'GET' };
+        const response = await fetch('api/viewer/api/v1/viewers/brava-view-1.x/loader', requestOptions);
+        const script = document.createElement('script');
+        script.src = response.url;
+        document.body.appendChild(script);
+      // eslint-disable-next-line
+      }, []);
 
     const closeViewer = useCallback(() => {
-      setViewerDisplay("none");
+        setViewerDisplay("none");
     }, [setViewerDisplay]);
 
     useEffect(() => {
@@ -84,25 +85,26 @@ export const Viewer = (props) => {
     }, [bravaApi, publicationData]);
 
     return (
-        <Grid size={{ xs: 12, md: 10, xl: 8 }}
-          sx={{ 
-            display: viewerDisplay, 
-            height: { xs: "100vh", lg: "85vh" }, 
-            width: { xs: "100vw", md: "65vw" },
-            position: { xs: "fixed", md: "relative" }, 
-            zIndex: { xs: 1, md: "auto" }, 
-            left: { xs: 0, md: "auto" },
-            top: { xs: 0, md: "auto" } 
-          }}>
-            <div 
-              id={VIEWER_ID} 
-              style={{ 
-              display: viewerDisplay, 
-              height: "100%",
-              width: "100%"
-            }}
-            >
-            </div>
-        </Grid>
+      <Box
+        sx={{ 
+          display: viewerDisplay, 
+          height: { xs: "100vh", md: "90vh" }, 
+          width: { xs: "100vw", md: "90vw" },
+          position: { xs: "fixed", md: "absolute" }, 
+          zIndex: { xs: 1, md: "auto" },
+          left: { xs: 0, md: "auto" },
+          top: { xs: 0, md: 80 }
+        }}
+      >
+        <div 
+          id={VIEWER_ID} 
+          style={{ 
+          display: viewerDisplay, 
+          height: "100%",
+          width: "100%"
+        }}
+        >
+        </div>
+      </Box>
     )
 }

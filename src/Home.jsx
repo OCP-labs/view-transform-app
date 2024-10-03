@@ -14,6 +14,8 @@ export const Home = () => {
   const [ publicationId, setPublicationId ] = useState();
   const [ loading, setLoading ] = useState(false);
 
+  const TEST_PUBLICATION_ID = "0635468b-ebd2-4d4b-86a6-1434c61603ab";
+
   const handleFileSelection = async(e) => {
     if (e.target.files[0]) {
         const file = e.target.files[0];
@@ -26,7 +28,6 @@ export const Home = () => {
 
   const uploadFile = async(file) => {
     try {
-        console.log(file);
         const formData = new FormData();
         formData.append('name', file);
         const requestOptions = { 
@@ -36,7 +37,6 @@ export const Home = () => {
         };
         const response = await fetch('css-api/v3/files/fromStream', requestOptions);
         const responseJson = await response.json();
-        console.log(responseJson);
         const publicationBody = createPublicationBody(file.name, responseJson.mimeType, responseJson.id);
         await addPublication(publicationBody);
     } catch(error) {
@@ -46,7 +46,6 @@ export const Home = () => {
   }
 
   const addPublication = async(publicationBodyJson) => {
-    console.log(publicationBodyJson);
     try {
         const requestOptions = { 
             method: 'POST', 
@@ -62,13 +61,8 @@ export const Home = () => {
             throw new Error("Publication failed");
         } else {
             setPublicationId(responseJson.id);
+            console.log(responseJson.id);
         }
-        /*
-        } else {
-            const attempts = 1;
-            return await getPublicationStatus(responseJson.id, attempts);
-        }
-        */
     } catch(error) {
         console.log(error);
     } finally {
@@ -85,7 +79,6 @@ export const Home = () => {
 
         if (responseJson.status === "Complete") {
             setPublicationData(responseJson);
-            console.log(responseJson);
             setLoading(false);
             setViewerDisplay("block");
         } else if (responseJson.status === "Failed") {
@@ -107,7 +100,17 @@ export const Home = () => {
     return new Promise((resolve) => {
         setTimeout(resolve, delay);
     })
-}
+  }
+
+  const downloadFile = async(id) => {
+    const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
+    const response = await fetch(`api/publication/api/v1/publications/${id}?embed=page_links`, requestOptions);
+    const responseJson = await response.json();
+    setPublicationId(TEST_PUBLICATION_ID);
+    setSelectedFile(publicationData);
+    setPublicationData(responseJson);
+    setLoading(false);
+  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
