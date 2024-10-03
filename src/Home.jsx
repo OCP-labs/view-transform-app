@@ -102,16 +102,6 @@ export const Home = () => {
     })
   }
 
-  const downloadFile = async(id) => {
-    const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
-    const response = await fetch(`api/publication/api/v1/publications/${id}?embed=page_links`, requestOptions);
-    const responseJson = await response.json();
-    setPublicationId(TEST_PUBLICATION_ID);
-    setSelectedFile(publicationData);
-    setPublicationData(responseJson);
-    setLoading(false);
-  }
-
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Grid container spacing={2} sx={{ mt: "2rem" }}>
