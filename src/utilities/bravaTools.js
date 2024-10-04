@@ -9,7 +9,8 @@ export const toolbarWithMarkupStuff = {
       { component: 'ZoomOutButton' },
       { component: 'ZoomExtentsButton' },
       { component: 'ZoomWidthButton' },
-      { component: 'RotateButton' }
+      { component: 'RotateButton' },
+      { component: 'ExportButton', format: 'pdf' },
     ],
     center: [{ component: 'TitleText' }],
     right: [
@@ -40,6 +41,63 @@ export const createTabContainer = (fullToolbarNeeded) => {
     }
     return tabContainer;
 }
+
+export const pdfExportActions = [
+    { id: 'download', default: true, message: 'Download to my browser' }
+]
+
+export const pdfExportDefaults = {
+    pageSizeName: '',
+    pagesToExport: 'all',
+    markupBurnin: 'burn',
+    colorConversion: 'original',
+    isoConformance: 'none',
+    successAction: 'download',
+    includeLayers: 'all',
+    rotateToOrientation: 'original',
+}
+
+export   const pdfExport = {
+    submitButtonLabel: 'publish',
+    tabs: [
+      {
+        title: 'tab.exportGeneral',
+        layout: [
+          { component: 'FormColumns', fields: ['PageOutput', 'PageSize', 'Orientation', 'Layering', 'OutputIso'] },
+          {
+            component: 'FieldSet',
+            title: 'coloring',
+            layout: [
+              {
+                component: 'FormColumns',
+                fields: ['ColorConversion', 'ApplyLineWeights', 'null', 'ForceThinLines']
+              }
+            ]
+          },
+          {
+            component: 'FieldSet',
+            title: 'markup',
+            toggle: 'includeMarkups',
+            layout: [
+              {
+                component: 'FormColumns',
+                fields: ['BurninMarkups', 'AppendComments', 'MarkupsAsComments', 'AppendReasons']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        title: 'tab.exportSecurity',
+        layout: [{ component: 'FormSection', fields: ['SecurityPassword', 'PermissionsPassword'] }]
+      },
+      {
+        title: 'tab.exportBannerWatermark',
+        layout: [{ component: 'BannerWatermark' }]
+      },
+      { title: 'tab.exportAction', layout: [{ component: 'FormSection', fields: ['SuccessAction'] }] }
+    ]
+  };
   
 export const markupTools = [
     {

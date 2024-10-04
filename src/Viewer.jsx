@@ -1,21 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from 'react-oidc-context';
 import { Box } from "@mui/material";
-import Grid from '@mui/material/Grid2';
 import * as bravaTools from "./utilities/bravaTools";
 
 export const Viewer = (props) => {
     const VIEWER_ID = "file-viewer-root";
+    const FULL_TOOLBAR_NEEDED = true;
 
     const { publicationData, viewerDisplay, setViewerDisplay } = props;
     const [ bravaApi, setBravaApi ] = useState();
     const { user } = useAuth();
-
-    const onBravaReady = (e) => {
-        window.api = window[e.detail];
-        setBravaApi(window.api);
-        console.log(e.detail);
-    }
 
     const loadViewer = useCallback(async () => {
         const requestOptions = { method: 'GET' };
@@ -30,13 +24,56 @@ export const Viewer = (props) => {
         setViewerDisplay("none");
     }, [setViewerDisplay]);
 
+    const getDownloadUrlFromPublication = async(publication, expAction) => {
+        console.log(publication);
+        console.log(expAction);
+        
+        const createDownloadUrl = (obj) => {
+            const urlTemplate = obj._embedded["pa:get_publication_artifacts"][0]._embedded["ac:get_artifact_content"].urlTemplate;
+            const id = obj._embedded["pa:get_publication_artifacts"][0]._embedded["ac:get_artifact_content"].contentLinks[0].id;
+            const url = urlTemplate.replace(/\{id\}/, id);
+            return url;
+        }
+        const url = createDownloadUrl(publication);
+        await downloadPdf(url);
+    }
+
+    const downloadPdf = async(url) => {
+        const index = url.indexOf('v3');
+        const path = url.substring(index);
+        const requestOptions = { 
+            method: 'GET',
+            headers: { 'Accept': 'application/octet-stream', 'Authorization': `Bearer ${user.access_token}` }, 
+            responseType: 'blob'
+        };
+        const response = await fetch(`css-api/${path}`, requestOptions);
+        const responseBlob = await response.blob();
+        const objectUrl = URL.createObjectURL(responseBlob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.setAttribute('download', 'Export.pdf');
+        document.body.appendChild(link);
+        link.click();
+    }
+
     useEffect(() => {
+      const handleExportDownload = async (e) => {
+        await getDownloadUrlFromPublication(e.detail, 'download');
+      }
+      const onBravaReady = (e) => {
+        window.api = window[e.detail];
+        setBravaApi(window.api);
+        window.addEventListener(e.detail + '-exportSuccess-download', handleExportDownload);
+        console.log(e.detail);
+      }
       window.addEventListener("bravaReady", onBravaReady);
       loadViewer();
       return () => {
         window.removeEventListener("bravaReady", onBravaReady);
+        window.removeEventListener(window.viewDetail + '-exportSuccess-download', handleExportDownload);
       }
     }, [loadViewer]);
+
 
     useEffect(() => {
       const viewerDiv = document.getElementById(VIEWER_ID);
@@ -76,8 +113,12 @@ export const Viewer = (props) => {
             { component: 'TabContainer', layoutKey: 'tabContainerWithMarkups' },
             { component: 'PageContainer' }
           ],
-          tabContainerWithMarkups: bravaTools.createTabContainer(true),
-          markupTools: bravaTools.markupTools
+          tabContainerWithMarkups: bravaTools.createTabContainer(FULL_TOOLBAR_NEEDED),
+          markupTools: bravaTools.markupTools,
+          pdfExport: bravaTools.pdfExport,
+          pdfExportActions: bravaTools.pdfExportActions,
+          pdfExportDefaults: bravaTools.pdfExportDefaults,
+          exportDialogs: ['pdf'],
           });
           bravaApi.addPublication(publicationData, true);
           bravaApi.render(VIEWER_ID); 

@@ -94,12 +94,31 @@ export const Home = () => {
     } finally {
         setLoading(false);
     }
+    /*
+    setLoading(true);
+    const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
+    const response = await fetch(`api/publication/api/v1/publications/${publicationId}?embed=page_links`, requestOptions);
+    const responseJson = await response.json();
+    setPublicationData(responseJson);
+    setViewerDisplay("block");
+    setLoading(false);
+    */
   }
 
   const asyncTimeout = (delay) => {
     return new Promise((resolve) => {
         setTimeout(resolve, delay);
     })
+  }
+
+  const downloadFile = async() => {
+    setLoading(true);
+    const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
+    const response = await fetch(`api/publication/api/v1/publications/${TEST_PUBLICATION_ID}`, requestOptions);
+    const responseJson = await response.json();
+    //setPublicationData(responseJson);
+    setSelectedFile(responseJson);
+    setLoading(false);
   }
 
   return (
@@ -113,13 +132,18 @@ export const Home = () => {
           </Button>
         </Grid>
         <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
+            <Button variant="contained" component="label" onClick={downloadFile}>Download file</Button>
+        </Grid>
+        <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
             {loading && <CircularProgress />}
             {selectedFile && !loading && 
                 <>
                     <Box sx={{ display: "inline-flex" }}>{selectedFile.name}</Box>
+                    {/*<Box sx={{ display: "inline-flex" }}>{selectedFile.featureSettings[0].value[0].filenameHint}</Box>*/}
                     <IconButton 
                         sx={{ display: "inline-flex" }} 
                         onClick={() => getPublicationStatus(publicationId, 1)}
+                        //onClick={() => getPublicationStatus(TEST_PUBLICATION_ID, 1)}
                     >
                         <VisibilityIcon />
                     </IconButton>
