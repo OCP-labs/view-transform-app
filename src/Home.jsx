@@ -14,6 +14,7 @@ export const Home = () => {
   const [ publicationId, setPublicationId ] = useState();
   const [ loading, setLoading ] = useState(false);
 
+  const TESTING = false;
   const TEST_PUBLICATION_ID = "0635468b-ebd2-4d4b-86a6-1434c61603ab";
 
   const handleFileSelection = async(e) => {
@@ -94,15 +95,16 @@ export const Home = () => {
     } finally {
         setLoading(false);
     }
-    /*
+  }
+
+  const getTestPublication = async () => {
     setLoading(true);
     const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
-    const response = await fetch(`api/publication/api/v1/publications/${publicationId}?embed=page_links`, requestOptions);
+    const response = await fetch(`api/publication/api/v1/publications/${TEST_PUBLICATION_ID}?embed=page_links`, requestOptions);
     const responseJson = await response.json();
     setPublicationData(responseJson);
     setViewerDisplay("block");
     setLoading(false);
-    */
   }
 
   const asyncTimeout = (delay) => {
@@ -111,12 +113,11 @@ export const Home = () => {
     })
   }
 
-  const downloadFile = async() => {
+  const downloadTestFile = async() => {
     setLoading(true);
     const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
     const response = await fetch(`api/publication/api/v1/publications/${TEST_PUBLICATION_ID}`, requestOptions);
     const responseJson = await response.json();
-    //setPublicationData(responseJson);
     setSelectedFile(responseJson);
     setLoading(false);
   }
@@ -131,19 +132,23 @@ export const Home = () => {
             <input type="file" hidden onChange={handleFileSelection} />
           </Button>
         </Grid>
+        {TESTING && 
         <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-            <Button variant="contained" component="label" onClick={downloadFile}>Download file</Button>
+            <Button variant="contained" component="label" onClick={downloadTestFile}>Download file</Button>
         </Grid>
+        }
         <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
             {loading && <CircularProgress />}
             {selectedFile && !loading && 
                 <>
+                    {TESTING ?
+                    <Box sx={{ display: "inline-flex" }}>{selectedFile.featureSettings[0].value[0].filenameHint}</Box>
+                    :
                     <Box sx={{ display: "inline-flex" }}>{selectedFile.name}</Box>
-                    {/*<Box sx={{ display: "inline-flex" }}>{selectedFile.featureSettings[0].value[0].filenameHint}</Box>*/}
+                    }
                     <IconButton 
                         sx={{ display: "inline-flex" }} 
-                        onClick={() => getPublicationStatus(publicationId, 1)}
-                        //onClick={() => getPublicationStatus(TEST_PUBLICATION_ID, 1)}
+                        onClick={TESTING ? () => getTestPublication(): () => getPublicationStatus(publicationId, 1)}
                     >
                         <VisibilityIcon />
                     </IconButton>
