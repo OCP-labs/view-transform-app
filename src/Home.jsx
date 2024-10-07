@@ -123,44 +123,38 @@ export const Home = () => {
   }
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Grid container spacing={2} sx={{ mt: "2rem" }}>
-        <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-          <Button variant="contained" component="label"
-          >
-            Upload file
-            <input type="file" hidden onChange={handleFileSelection} />
-          </Button>
-        </Grid>
+    <Box sx={{ height: "100vh" }}>
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", height:"60%", width: "100%" }}>
+        <Button sx={{ width: { xs: "50%", sm: "35%", md: "25%", lg: "15%" }, margin: "5px", position: "absolute" }} variant="contained" component="label"
+        >
+          Upload file
+          <input type="file" hidden onChange={handleFileSelection} />
+        </Button>
         {TESTING && 
-          <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-            <Button variant="contained" component="label" onClick={downloadTestFile}
-            >
-              Download file
-            </Button>
-          </Grid>
+          <Button variant="contained" component="label" onClick={downloadTestFile}
+          >
+            Download file
+          </Button>
         }
-        <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-          {loading && <CircularProgress />}
-          {selectedFile && !loading && 
-              <>
-                {TESTING ?
-                <Box sx={{ display: "inline-flex" }}>{selectedFile.featureSettings[0].value[0].filenameHint}</Box>
-                :
-                <Box sx={{ display: "inline-flex" }}>{selectedFile.name}</Box>
-                }
-                <IconButton 
-                  sx={{ display: "inline-flex" }} 
-                  onClick={TESTING ? () => getTestPublication(): () => getPublicationStatus(publicationId, 1)}
-                >
-                  <VisibilityIcon />
-                </IconButton>
-              </>
+        {loading && <CircularProgress sx={{ position: "relative", top: 50 }} />}
+        {selectedFile && !loading && 
+        <Box sx={{ position: "relative", top: 50 }} >
+          {TESTING ?
+          <Box sx={{ }}>{selectedFile.featureSettings[0].value[0].filenameHint}</Box>
+          :
+          <Box sx={{ display: "inline-block", position: "relative" }}>{selectedFile.name}</Box>
           }
-        </Grid>
-        <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-          <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} />
-        </Grid>
+          <IconButton 
+            sx={{ display: "inline-block", position: "relative" }} 
+            onClick={TESTING ? () => getTestPublication(): () => getPublicationStatus(publicationId, 1)}
+          >
+            <VisibilityIcon />
+          </IconButton>
+        </Box>
+      }
+      </Box>
+      <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
+        <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} />
       </Grid>
     </Box>
   )
