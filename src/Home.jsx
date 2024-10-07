@@ -12,6 +12,7 @@ export const Home = () => {
   const [ viewerDisplay, setViewerDisplay ] = useState("none");
   const [ selectedFile, setSelectedFile ] = useState();
   const [ publicationId, setPublicationId ] = useState();
+  const [ viewFileEnabled, setViewFileEnabled ] = useState(false);
   const [ loading, setLoading ] = useState(false);
 
   const TESTING = false;
@@ -20,6 +21,7 @@ export const Home = () => {
   const handleFileSelection = async(e) => {
     if (e.target.files[0]) {
         const file = e.target.files[0];
+        setViewFileEnabled(false);
         setLoading(true);
         setSelectedFile(file);
         await uploadFile(file);
@@ -62,6 +64,7 @@ export const Home = () => {
             throw new Error("Publication failed");
         } else {
             setPublicationId(responseJson.id);
+            setViewFileEnabled(true);
             console.log(responseJson.id);
         }
     } catch(error) {
@@ -124,32 +127,69 @@ export const Home = () => {
 
   return (
     <Box sx={{ height: "100vh" }}>
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", height:"60%", width: "100%" }}>
-        <Button sx={{ width: { xs: "50%", sm: "35%", md: "25%", lg: "15%" }, margin: "5px", position: "absolute" }} variant="contained" component="label"
-        >
-          Upload file
-          <input type="file" hidden onChange={handleFileSelection} />
-        </Button>
-        {TESTING && 
-          <Button variant="contained" component="label" onClick={downloadTestFile}
+      <Box sx={{ 
+        display: "flex", 
+        justifyContent: "center", 
+        alignItems: "center", 
+        flexDirection: "column", 
+        height:"60%", 
+        width: "100%" 
+        }}
+      >
+        <Box sx={{ 
+          display: "flex", 
+          position: "absolute", 
+          flexDirection: "row", 
+          width: "100%",
+          justifyContent: "center", 
+          alignItems: "center", 
+        }}>
+          {
+            TESTING ?
+            <Button sx={{ 
+              display: "inline-flex",
+              width: { xs: "40%", sm: "35%", md: "25%", lg: "15%" }, 
+            }} 
+              variant="contained" 
+              component="label" 
+              onClick={downloadTestFile}
+            >
+              Download file
+            </Button>
+            :
+            <Button sx={{ 
+              width: { xs: "40%", sm: "35%", md: "25%", lg: "12%" }, 
+              display: "inline-flex",
+              margin: "0.5rem"
+            }} 
+              variant="contained" 
+              component="label"
+            >
+              Upload file
+              <input type="file" hidden onChange={handleFileSelection} />
+            </Button>
+          }
+          <Button sx={{ 
+            display: "inline-flex", 
+            width: { xs: "40%", sm: "35%", md: "25%", lg: "12%" },
+            margin: "0.5rem"
+          }} 
+            variant="contained" 
+            component="label"
+            onClick={TESTING ? () => getTestPublication(): () => getPublicationStatus(publicationId, 1)}
+            disabled={!viewFileEnabled}
           >
-            Download file
+            View File
           </Button>
-        }
+        </Box>
         {loading && <CircularProgress sx={{ position: "relative", top: 50 }} />}
         {selectedFile && !loading && 
         <Box sx={{ position: "relative", top: 50 }} >
           {TESTING ?
-          <Box sx={{ }}>{selectedFile.featureSettings[0].value[0].filenameHint}</Box>
+          <Box sx={{ display: "inline-block", position: "relative" }}>{selectedFile.featureSettings[0].value[0].filenameHint}</Box>
           :
           <Box sx={{ display: "inline-block", position: "relative" }}>{selectedFile.name}</Box>
           }
-          <IconButton 
-            sx={{ display: "inline-block", position: "relative" }} 
-            onClick={TESTING ? () => getTestPublication(): () => getPublicationStatus(publicationId, 1)}
-          >
-            <VisibilityIcon />
-          </IconButton>
         </Box>
       }
       </Box>
