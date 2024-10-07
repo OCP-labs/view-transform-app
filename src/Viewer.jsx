@@ -77,16 +77,6 @@ export const Viewer = (props) => {
       }
     }, [loadViewer, closeViewer]);
 
-    /*
-    useEffect(() => {
-      const viewerDiv = document.getElementById(VIEWER_ID);
-      viewerDiv.addEventListener("close", closeViewer);
-      return () => {
-        viewerDiv.removeEventListener("close", closeViewer);
-      }
-    }, [closeViewer]);
-    */
-
     useEffect(() => {
       if (bravaApi) {
         bravaApi.setHttpHeaders({

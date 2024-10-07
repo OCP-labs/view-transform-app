@@ -133,30 +133,33 @@ export const Home = () => {
           </Button>
         </Grid>
         {TESTING && 
-        <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-            <Button variant="contained" component="label" onClick={downloadTestFile}>Download file</Button>
-        </Grid>
+          <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
+            <Button variant="contained" component="label" onClick={downloadTestFile}
+            >
+              Download file
+            </Button>
+          </Grid>
         }
         <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-            {loading && <CircularProgress />}
-            {selectedFile && !loading && 
-                <>
-                    {TESTING ?
-                    <Box sx={{ display: "inline-flex" }}>{selectedFile.featureSettings[0].value[0].filenameHint}</Box>
-                    :
-                    <Box sx={{ display: "inline-flex" }}>{selectedFile.name}</Box>
-                    }
-                    <IconButton 
-                        sx={{ display: "inline-flex" }} 
-                        onClick={TESTING ? () => getTestPublication(): () => getPublicationStatus(publicationId, 1)}
-                    >
-                        <VisibilityIcon />
-                    </IconButton>
-                </>
-            }
+          {loading && <CircularProgress />}
+          {selectedFile && !loading && 
+              <>
+                {TESTING ?
+                <Box sx={{ display: "inline-flex" }}>{selectedFile.featureSettings[0].value[0].filenameHint}</Box>
+                :
+                <Box sx={{ display: "inline-flex" }}>{selectedFile.name}</Box>
+                }
+                <IconButton 
+                  sx={{ display: "inline-flex" }} 
+                  onClick={TESTING ? () => getTestPublication(): () => getPublicationStatus(publicationId, 1)}
+                >
+                  <VisibilityIcon />
+                </IconButton>
+              </>
+          }
         </Grid>
         <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-            <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} />
+          <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} />
         </Grid>
       </Grid>
     </Box>
