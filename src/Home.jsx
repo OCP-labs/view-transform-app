@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from 'react-oidc-context';
-import { Box, Button, CircularProgress, IconButton } from "@mui/material";
+import { Box, Button, CircularProgress } from "@mui/material";
 import Grid from '@mui/material/Grid2';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import { createPublicationBody } from "./utilities/createPublicationBody";
 import { Viewer } from "./Viewer";
 
@@ -122,6 +121,7 @@ export const Home = () => {
     const response = await fetch(`api/publication/api/v1/publications/${TEST_PUBLICATION_ID}`, requestOptions);
     const responseJson = await response.json();
     setSelectedFile(responseJson);
+    setViewFileEnabled(true);
     setLoading(false);
   }
 
