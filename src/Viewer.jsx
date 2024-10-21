@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from 'react-oidc-context';
 import { Box } from "@mui/material";
 import * as bravaTools from "./utilities/bravaTools";
+import { getDownloadUrlFromPublication } from "./utilities/publicationTools";
 
 export const Viewer = (props) => {
     const VIEWER_ID = "file-viewer-root";
@@ -24,21 +25,8 @@ export const Viewer = (props) => {
       setViewerDisplay("none");
     }, [setViewerDisplay]);
 
-    const getDownloadUrlFromPublication = (publicationJson) => {
-      console.log(publicationJson);    
-      const createDownloadUrl = (obj) => {
-        const urlTemplate = obj._embedded["pa:get_publication_artifacts"][0]._embedded["ac:get_artifact_content"].urlTemplate;
-        const id = obj._embedded["pa:get_publication_artifacts"][0]._embedded["ac:get_artifact_content"].contentLinks[0].id;
-        const url = urlTemplate.replace(/\{id\}/, id);
-        return url;
-      }
-      const url = createDownloadUrl(publicationJson);
-      console.log(url);
-      return url;
-    }
-
-    const downloadPdf = async(publicationJson) => {
-      const url = getDownloadUrlFromPublication(publicationJson);
+    const downloadPdf = async(publicationJson, redactedVersion) => {
+      const url = getDownloadUrlFromPublication(publicationJson, redactedVersion);
       const index = url.indexOf('v3');
       const pathForProxy = url.substring(index);
       const requestOptions = {
@@ -54,11 +42,12 @@ export const Viewer = (props) => {
       link.setAttribute('download', 'Export.pdf');
       document.body.appendChild(link);
       link.click();
-    }
+  }
 
     useEffect(() => {
       const handleExportDownload = async (e) => {
-        await downloadPdf(e.detail);
+        const redactedVersion = false
+        await downloadPdf(e.detail, redactedVersion);
       }
       const onBravaReady = (e) => {
         window.api = window[e.detail];
