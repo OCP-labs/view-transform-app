@@ -42,14 +42,14 @@ export const Home = () => {
       const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id);
       setBlobId(responseJson.id);
       window.localStorage.setItem("last_blob_id", responseJson.id);
-      await addPublication(publicationBody);
+      await addNewPublication(publicationBody);
     } catch(error) {
       console.log(error);
       setLoading(false);
     }
   }
 
-  const addPublication = async(publicationBodyJson) => {
+  const addNewPublication = async(publicationBodyJson) => {
     try {
       const requestOptions = { 
         method: 'POST', 
@@ -187,7 +187,7 @@ export const Home = () => {
         setViewFileEnabled(true);
         setLoading(false);
       } else {
-        await addPublication(publicationBody)
+        await addNewPublication(publicationBody)
       }
     } catch (error) {
       console.log(error);

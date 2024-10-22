@@ -25,6 +25,7 @@ export const Viewer = (props) => {
       setViewerDisplay("none");
     }, [setViewerDisplay]);
 
+    // TODO: Remove redactedVersion flag
     const downloadPdf = async(publicationJson, redactedVersion) => {
       const url = getDownloadUrlFromPublication(publicationJson, redactedVersion);
       const index = url.indexOf('v3');
@@ -42,7 +43,7 @@ export const Viewer = (props) => {
       link.setAttribute('download', 'Export.pdf');
       document.body.appendChild(link);
       link.click();
-  }
+    }
 
     useEffect(() => {
       const handleExportDownload = async (e) => {
