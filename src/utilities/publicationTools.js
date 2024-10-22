@@ -41,7 +41,30 @@ export const createPublicationBody = (filename, mimeType, blobId) => {
     return publicationBody;
 }
 
-export const xmlRedactionScriptString = '<?xml version="1.0" encoding="UTF-8"?><RedactionScript version="1"><RedactionCommand comment="SSN" hyperlink="developer.opentext.com"><SearchString string="[:ssn:]" matchWholeWord="false"/></RedactionCommand><RedactionCommand comment="Credit Card" hyperlink="developer.opentext.com"><SearchString string="[:creditcard:]" matchWholeWord="false"/></RedactionCommand></RedactionScript>'
+export const RedactMacros = Object.freeze({
+    SSN: { macro: "[:ssn:]", comment: "SSN" },
+    CREDIT_CARD: { macro: "[:creditcard:]", comment: "Credit Card" },
+    EMAIL: { macro: "[:email:]", comment: "Email" },
+    US_PHONE: { macro: "[:usphone:]", comment: "US Phone" },
+    US_MONEY: { macro: "[:usmoney:]", comment: "US Money" },
+    DOB: { macro: "[:dob:]", comment: "Date of Birth" }
+})
+
+export const createXmlRedactionScript = (macroObjectsArray, stringsArray=null) => {
+    const startingString = '<?xml version="1.0" encoding="UTF-8"?><RedactionScript version="1">';
+    const endingString = '</RedactionScript>'
+    const macroRedactionCommands = macroObjectsArray.map(obj => {
+        return `<RedactionCommand comment="${obj.comment}" hyperlink="developer.opentext.com"><SearchString string="${obj.macro}" matchWholeWord="false"/></RedactionCommand>`;
+    }).join('');
+    let stringRedactionCommands = null;
+    if (stringsArray) {
+        stringRedactionCommands = stringsArray.map(string => {
+            return `<RedactionCommand hyperlink="developer.opentext.com"><SearchString string="${string}" matchWholeWord="true"/></RedactionCommand>`;
+        }).join('');
+    }
+    const fullXmlString = startingString + macroRedactionCommands + stringRedactionCommands + endingString;
+    return fullXmlString;
+}
 
 export const createRedactedPublicationBody = (filename, mimeType, blobId, encodedXmlString) => {
     const publicationBody = 

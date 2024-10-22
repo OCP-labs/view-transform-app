@@ -13,9 +13,10 @@ export const Home = () => {
   const [ publicationId, setPublicationId ] = useState();
   const [ blobId, setBlobId ] = useState();
   const [ viewFileEnabled, setViewFileEnabled ] = useState(false);
+  const [ redactFileEnabled, setRedactFileEnabled ] = useState(false);
   const [ loading, setLoading ] = useState(false);
 
-  const TESTING = false;
+  const TESTING = true;
   const TEST_PUBLICATION_ID = "0635468b-ebd2-4d4b-86a6-1434c61603ab";
   const TEST_FILENAME = "Standard Contract [RISK = 5-VERY HIGH].pdf";
 
@@ -87,6 +88,7 @@ export const Home = () => {
           await downloadPdf(responseJson, redactedVersion);
         } else {
           setPublicationData(responseJson);
+          setRedactFileEnabled(true);
           setLoading(false);
           setViewerDisplay("block");
         }
@@ -115,7 +117,8 @@ export const Home = () => {
     const filename = TESTING ? TEST_FILENAME : selectedFile.name;
     const mimeType = TESTING ? "application/pdf" : selectedFile.type;
     const cssId = TESTING ? publicationData.featureSettings[0].value[0].url.split("/")[5] : blobId;
-    const base64EncodedXmlString = btoa(publicationTools.xmlRedactionScriptString);
+    const rawXmlString = publicationTools.createXmlRedactionScript([publicationTools.RedactMacros.SSN, publicationTools.RedactMacros.CREDIT_CARD]);
+    const base64EncodedXmlString = btoa(rawXmlString);
     const publicationBody = publicationTools.createRedactedPublicationBody(filename, mimeType, cssId, base64EncodedXmlString);
 
     try {
@@ -176,6 +179,7 @@ export const Home = () => {
     const response = await fetch(`api/publication/api/v1/publications/${TEST_PUBLICATION_ID}?embed=page_links`, requestOptions);
     const responseJson = await response.json();
     setPublicationData(responseJson);
+    setRedactFileEnabled(true);
     setViewerDisplay("block");
     setLoading(false);
   }
@@ -251,7 +255,7 @@ export const Home = () => {
           }} 
             variant="contained" 
             component="label"
-            disabled={!viewFileEnabled}
+            disabled={!redactFileEnabled}
             onClick={createRedactedDocument}
           >
             Redact
