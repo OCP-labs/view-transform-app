@@ -15,7 +15,7 @@ export const Home = () => {
   const [ viewFileEnabled, setViewFileEnabled ] = useState(false);
   const [ loading, setLoading ] = useState(false);
 
-  const TESTING = true;
+  const TESTING = false;
   const TEST_PUBLICATION_ID = "0635468b-ebd2-4d4b-86a6-1434c61603ab";
   const TEST_FILENAME = "Standard Contract [RISK = 5-VERY HIGH].pdf";
 
@@ -219,7 +219,7 @@ export const Home = () => {
               component="label" 
               onClick={downloadTestFile}
             >
-              Download file
+              Download
             </Button>
             :
             <Button sx={{ 
@@ -229,7 +229,7 @@ export const Home = () => {
               variant="contained" 
               component="label"
             >
-              Upload file
+              Upload
               <input type="file" hidden onChange={handleFileSelection} />
             </Button>
           }
@@ -243,7 +243,7 @@ export const Home = () => {
             onClick={TESTING ? () => getTestPublication(): () => getPublicationStatus(publicationId, 1, false)}
             disabled={!viewFileEnabled}
           >
-            View File
+            View
           </Button>
           <Button sx={{ 
             display: "inline-flex", 
