@@ -16,10 +16,6 @@ export const Home = () => {
   const [ loading, setLoading ] = useState(false);
 
   const TESTING = true;
-  const TEST_PUBLICATION_ID = "0635468b-ebd2-4d4b-86a6-1434c61603ab";
-  const TEST_BLOB_ID = "48476cb7-3316-421d-b24b-fa9621d8f5a0";
-  const TEST_FILENAME = "Standard Contract [RISK = 5-VERY HIGH].pdf";
-  const TEST_MIME_TYPE = "application/pdf";
 
   const handleFileSelection = async(e) => {
     if (e.target.files[0]) {
@@ -45,6 +41,7 @@ export const Home = () => {
       const responseJson = await response.json();
       const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id);
       setBlobId(responseJson.id);
+      window.localStorage.setItem("last_blob_id", responseJson.id);
       await addPublication(publicationBody);
     } catch(error) {
       console.log(error);
@@ -68,8 +65,8 @@ export const Home = () => {
         throw new Error("Publication failed");
       } else {
         setPublicationId(responseJson.id);
+        window.localStorage.setItem("last_pub_id", responseJson.id);
         setViewFileEnabled(true);
-        console.log(responseJson.id);
       }
     } catch(error) {
       console.log(error);
@@ -114,9 +111,9 @@ export const Home = () => {
   
   const createRedactedDocument = async() => {
     setLoading(true);
-    const filename = TESTING ? TEST_FILENAME : selectedFile.name;
-    const mimeType = TESTING ? TEST_MIME_TYPE : selectedFile.type;
-    const cssId = TESTING ? TEST_BLOB_ID : blobId;
+    const filename = selectedFile.name;
+    const mimeType = selectedFile.type;
+    const cssId = blobId;
     const rawXmlString = publicationTools.createXmlRedactionScript([publicationTools.RedactMacros.SSN, publicationTools.RedactMacros.CREDIT_CARD]);
     const base64EncodedXmlString = btoa(rawXmlString);
     const publicationBody = publicationTools.createRedactedPublicationBody(filename, mimeType, cssId, base64EncodedXmlString);
@@ -166,31 +163,36 @@ export const Home = () => {
       const newFilename = newBaseFilename + fileExtension;
       return newFilename;
     }
-    const originalFilename = TESTING ? TEST_FILENAME : selectedFile.name;
+    const originalFilename = selectedFile.name;
     const newFilename = createRedactedFilename(originalFilename);
     link.setAttribute('download', newFilename);
     document.body.appendChild(link);
     link.click();
-}
-
-  const getTestPublication = async () => {
-    setLoading(true);
-    const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
-    const response = await fetch(`api/publication/api/v1/publications/${TEST_PUBLICATION_ID}?embed=page_links`, requestOptions);
-    const responseJson = await response.json();
-    setPublicationData(responseJson);
-    setViewerDisplay("block");
-    setLoading(false);
   }
 
+  // Function for downloading previously uploaded file for testing purposes
   const downloadTestFile = async() => {
     setLoading(true);
     const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
-    const response = await fetch(`api/publication/api/v1/publications/${TEST_PUBLICATION_ID}`, requestOptions);
-    const responseJson = await response.json();
-    setSelectedFile(responseJson);
-    setViewFileEnabled(true);
-    setLoading(false);
+    const testBlobId = window.localStorage.getItem("last_blob_id") ? window.localStorage.getItem("last_blob_id") : "48476cb7-3316-421d-b24b-fa9621d8f5a0";
+    try {
+      const response = await fetch(`css-api/v3/files/${testBlobId}`, requestOptions);
+      const responseJson = await response.json();
+      setSelectedFile({ name: responseJson.originalFileName, type: responseJson.mimeType });
+      const publicationBody = publicationTools.createPublicationBody(responseJson.originalFileName, responseJson.mimeType, responseJson.id);
+      setBlobId(responseJson.id);
+      const lastPubId = window.localStorage.getItem("last_pub_id");
+      if (lastPubId) {
+        setPublicationId(lastPubId);
+        setViewFileEnabled(true);
+        setLoading(false);
+      } else {
+        await addPublication(publicationBody)
+      }
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
   }
 
   return (
@@ -243,7 +245,7 @@ export const Home = () => {
           }} 
             variant="contained" 
             component="label"
-            onClick={TESTING ? () => getTestPublication(): () => getPublicationStatus(publicationId, 1, false)}
+            onClick={() => getPublicationStatus(publicationId, 1, false)}
             disabled={!viewFileEnabled}
           >
             View
@@ -263,11 +265,7 @@ export const Home = () => {
         {loading && <CircularProgress sx={{ position: "relative", top: 50 }} />}
         {selectedFile && !loading && 
         <Box sx={{ position: "relative", top: 50 }} >
-          {TESTING ?
-          <Box sx={{ display: "inline-block", position: "relative" }}>{selectedFile.featureSettings[0].value[0].filenameHint}</Box>
-          :
           <Box sx={{ display: "inline-block", position: "relative" }}>{selectedFile.name}</Box>
-          }
         </Box>
       }
       </Box>
