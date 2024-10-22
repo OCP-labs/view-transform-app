@@ -15,8 +15,6 @@ export const Home = () => {
   const [ viewFileEnabled, setViewFileEnabled ] = useState(false);
   const [ loading, setLoading ] = useState(false);
 
-  const TESTING = true;
-
   const handleFileSelection = async(e) => {
     if (e.target.files[0]) {
       const file = e.target.files[0];
@@ -215,7 +213,7 @@ export const Home = () => {
           alignItems: "center", 
         }}>
           {
-            TESTING ?
+            import.meta.env.TESTING === "true" ?
             <Button sx={{ 
               display: "inline-flex",
               width: { xs: "40%", sm: "35%", md: "25%", lg: "15%" }, 
