@@ -13,12 +13,13 @@ export const Home = () => {
   const [ publicationId, setPublicationId ] = useState();
   const [ blobId, setBlobId ] = useState();
   const [ viewFileEnabled, setViewFileEnabled ] = useState(false);
-  const [ redactFileEnabled, setRedactFileEnabled ] = useState(false);
   const [ loading, setLoading ] = useState(false);
 
   const TESTING = true;
   const TEST_PUBLICATION_ID = "0635468b-ebd2-4d4b-86a6-1434c61603ab";
+  const TEST_BLOB_ID = "48476cb7-3316-421d-b24b-fa9621d8f5a0";
   const TEST_FILENAME = "Standard Contract [RISK = 5-VERY HIGH].pdf";
+  const TEST_MIME_TYPE = "application/pdf";
 
   const handleFileSelection = async(e) => {
     if (e.target.files[0]) {
@@ -88,7 +89,6 @@ export const Home = () => {
           await downloadPdf(responseJson, redactedVersion);
         } else {
           setPublicationData(responseJson);
-          setRedactFileEnabled(true);
           setLoading(false);
           setViewerDisplay("block");
         }
@@ -115,8 +115,8 @@ export const Home = () => {
   const createRedactedDocument = async() => {
     setLoading(true);
     const filename = TESTING ? TEST_FILENAME : selectedFile.name;
-    const mimeType = TESTING ? "application/pdf" : selectedFile.type;
-    const cssId = TESTING ? publicationData.featureSettings[0].value[0].url.split("/")[5] : blobId;
+    const mimeType = TESTING ? TEST_MIME_TYPE : selectedFile.type;
+    const cssId = TESTING ? TEST_BLOB_ID : blobId;
     const rawXmlString = publicationTools.createXmlRedactionScript([publicationTools.RedactMacros.SSN, publicationTools.RedactMacros.CREDIT_CARD]);
     const base64EncodedXmlString = btoa(rawXmlString);
     const publicationBody = publicationTools.createRedactedPublicationBody(filename, mimeType, cssId, base64EncodedXmlString);
@@ -179,7 +179,6 @@ export const Home = () => {
     const response = await fetch(`api/publication/api/v1/publications/${TEST_PUBLICATION_ID}?embed=page_links`, requestOptions);
     const responseJson = await response.json();
     setPublicationData(responseJson);
-    setRedactFileEnabled(true);
     setViewerDisplay("block");
     setLoading(false);
   }
@@ -255,7 +254,7 @@ export const Home = () => {
           }} 
             variant="contained" 
             component="label"
-            disabled={!redactFileEnabled}
+            disabled={!viewFileEnabled}
             onClick={createRedactedDocument}
           >
             Redact
