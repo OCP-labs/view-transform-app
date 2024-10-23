@@ -153,22 +153,25 @@ export const Home = () => {
     const objectUrl = URL.createObjectURL(responseBlob);
     const link = document.createElement('a');
     link.href = objectUrl;
-    const createRedactedFilename = (originalFilename) => {
-      const index = originalFilename.lastIndexOf(".");
-      const baseFilename =  originalFilename.substring(0, index);
-      const fileExtension = originalFilename.substring(index);
-      const newBaseFilename = baseFilename + "[REDACTED]";
-      const newFilename = newBaseFilename + fileExtension;
-      return newFilename;
+    let filename = 'Export.pdf';
+    if (redactedVersion) {
+      const createRedactedFilename = (originalFilename) => {
+        const index = originalFilename.lastIndexOf(".");
+        const baseFilename =  originalFilename.substring(0, index);
+        const fileExtension = originalFilename.substring(index);
+        const newBaseFilename = baseFilename + "[REDACTED]";
+        const newFilename = newBaseFilename + fileExtension;
+        return newFilename;
+      }
+      const originalFilename = selectedFile.name;
+      filename = createRedactedFilename(originalFilename);
     }
-    const originalFilename = selectedFile.name;
-    const newFilename = createRedactedFilename(originalFilename);
-    link.setAttribute('download', newFilename);
+    link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
   }
 
-  // Function for downloading previously uploaded file for testing purposes
+  // Function for downloading previously uploaded file, intended for testing purposes only
   const downloadTestFile = async() => {
     setLoading(true);
     const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
@@ -213,7 +216,7 @@ export const Home = () => {
           alignItems: "center", 
         }}>
           {
-            import.meta.env.TESTING === "true" ?
+            import.meta.env.VITE_TESTING === "true" ?
             <Button sx={{ 
               display: "inline-flex",
               width: { xs: "40%", sm: "35%", md: "25%", lg: "15%" }, 
@@ -268,7 +271,7 @@ export const Home = () => {
       }
       </Box>
       <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-        <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} />
+        <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} downloadPdf={downloadPdf} />
       </Grid>
     </Box>
   )
