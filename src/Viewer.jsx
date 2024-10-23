@@ -2,13 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from 'react-oidc-context';
 import { Box } from "@mui/material";
 import * as bravaTools from "./utilities/bravaTools";
-import { getDownloadUrlFromPublication } from "./utilities/publicationTools";
+//import { getDownloadUrlFromPublication } from "./utilities/publicationTools";
 
 export const Viewer = (props) => {
   const VIEWER_ID = "file-viewer-root";
   const FULL_TOOLBAR_NEEDED = true;
 
-  const { publicationData, viewerDisplay, setViewerDisplay } = props;
+  const { publicationData, viewerDisplay, setViewerDisplay, downloadFile } = props;
   const [ bravaApi, setBravaApi ] = useState();
   const { user } = useAuth();
 
@@ -25,43 +25,23 @@ export const Viewer = (props) => {
     setViewerDisplay("none");
   }, [setViewerDisplay]);
 
-  const downloadFile = async(publicationJson) => {
-    const redactedVersion = false;
-    const url = getDownloadUrlFromPublication(publicationJson, redactedVersion);
-    const index = url.indexOf('v3');
-    const pathForProxy = url.substring(index);
-    const requestOptions = {
-      method: 'GET',
-      headers: { 'Accept': 'application/octet-stream', 'Authorization': `Bearer ${user.access_token}` },
-      responseType: 'blob'
-    };
-    const response = await fetch(`css-api/${pathForProxy}`, requestOptions);
-    const responseBlob = await response.blob();
-    const objectUrl = URL.createObjectURL(responseBlob);
-    const link = document.createElement('a');
-    link.href = objectUrl;
-    let filename;
-    const exportType = publicationJson.tags[0].bravaView;
-    switch(exportType) {
-      case 'pdfExport':
-        filename = 'Export.pdf';
-        break;
-      case 'tiffExport':
-        filename = 'Export.tif';
-        break;
-      default:
-        filename = 'Export.pdf';
-    }
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-  }
-
   // Listening for Viewer events - bravaReady, close, and exportSuccess
   useEffect(() => {
     const handleExportDownload = async (e) => {
-      //const redactedVersion = false
-      await downloadFile(e.detail);
+      console.log(e.detail);
+      let filename;
+      const exportType = e.detail.tags[0].bravaView;
+      switch(exportType) {
+        case 'pdfExport':
+          filename = 'Export.pdf';
+          break;
+        case 'tiffExport':
+          filename = 'Export.tif';
+          break;
+        default:
+          filename = 'Export.pdf';
+      }
+      await downloadFile(e.detail, filename);
     }
     const onBravaReady = (e) => {
       window.api = window[e.detail];

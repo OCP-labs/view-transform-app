@@ -88,7 +88,8 @@ export const Home = () => {
       if (responseJson.status === "Complete") {
         // If we want the redacted version, just download the new document
         if (redactedVersion) {
-          await downloadPdf(responseJson, redactedVersion);
+          const redactedFilename = createRedactedFilename(selectedFile.name);
+          await downloadFile(responseJson, redactedFilename, redactedVersion);
 
         // If we want to load a viewer rendition, then save the entire publication response for use by the Viewing Service JSAPI
         } else {
@@ -152,8 +153,17 @@ export const Home = () => {
     }
   }
 
+  const createRedactedFilename = (originalFilename) => {
+    const index = originalFilename.lastIndexOf(".");
+    const baseFilename =  originalFilename.substring(0, index);
+    const fileExtension = originalFilename.substring(index);
+    const newBaseFilename = baseFilename + "[REDACTED]";
+    const newFilename = newBaseFilename + fileExtension;
+    return newFilename;
+  }
+
   // Use download URL from the publication response to download the document from CSS
-  const downloadPdf = async(publicationJson, redactedVersion) => {
+  const downloadFile = async(publicationJson, filename, redactedVersion=false) => {
     const url = publicationTools.getDownloadUrlFromPublication(publicationJson, redactedVersion);
     const index = url.indexOf('v3');
     const pathForProxy = url.substring(index);
@@ -167,16 +177,6 @@ export const Home = () => {
     const objectUrl = URL.createObjectURL(responseBlob);
     const link = document.createElement('a');
     link.href = objectUrl;
-    const createRedactedFilename = (originalFilename) => {
-      const index = originalFilename.lastIndexOf(".");
-      const baseFilename =  originalFilename.substring(0, index);
-      const fileExtension = originalFilename.substring(index);
-      const newBaseFilename = baseFilename + "[REDACTED]";
-      const newFilename = newBaseFilename + fileExtension;
-      return newFilename;
-    }
-    const originalFilename = selectedFile.name;
-    const filename = createRedactedFilename(originalFilename);
     link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
@@ -283,7 +283,7 @@ export const Home = () => {
       }
       </Box>
       <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-        <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} downloadPdf={downloadPdf} />
+        <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} downloadFile={downloadFile} />
       </Grid>
     </Box>
   )
