@@ -26,7 +26,6 @@ export const Viewer = (props) => {
   }, [setViewerDisplay]);
 
   const downloadFile = async(publicationJson) => {
-    console.log(publicationJson);
     const redactedVersion = false;
     const url = getDownloadUrlFromPublication(publicationJson, redactedVersion);
     const index = url.indexOf('v3');
@@ -41,8 +40,18 @@ export const Viewer = (props) => {
     const objectUrl = URL.createObjectURL(responseBlob);
     const link = document.createElement('a');
     link.href = objectUrl;
+    let filename;
     const exportType = publicationJson.tags[0].bravaView;
-    const filename = exportType === 'tiffExport' ? 'Export.tif' : 'Export.pdf';
+    switch(exportType) {
+      case 'pdfExport':
+        filename = 'Export.pdf';
+        break;
+      case 'tiffExport':
+        filename = 'Export.tif';
+        break;
+      default:
+        filename = 'Export.pdf';
+    }
     link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();

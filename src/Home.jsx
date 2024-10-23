@@ -11,7 +11,7 @@ export const Home = () => {
   const [ viewerDisplay, setViewerDisplay ] = useState("none");
   const [ selectedFile, setSelectedFile ] = useState();
   const [ publicationId, setPublicationId ] = useState();
-  const [ blobId, setBlobId ] = useState();
+  const [ cssId, setCssId ] = useState();
   const [ viewFileEnabled, setViewFileEnabled ] = useState(false);
   const [ redactFileEnabled, setRedactFileEnabled ] = useState(false);
   const [ loading, setLoading ] = useState(false);
@@ -39,7 +39,7 @@ export const Home = () => {
       };
       const response = await fetch('css-api/v3/files/fromStream', requestOptions); // Uploading file
       const responseJson = await response.json();
-      setBlobId(responseJson.id); // Saving CSS id for the file
+      setCssId(responseJson.id); // Saving CSS id for the file
       const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id); // Create publication body for Brava rendition of file
       window.localStorage.setItem("last_blob_id", responseJson.id);
       file.type.includes("image") ? setRedactFileEnabled(false) : setRedactFileEnabled(true);
@@ -123,7 +123,6 @@ export const Home = () => {
     setLoading(true);
     const filename = selectedFile.name;
     const mimeType = selectedFile.type;
-    const cssId = blobId;
     const rawXmlString = publicationTools.createXmlRedactionScript([publicationTools.RedactMacros.SSN, publicationTools.RedactMacros.CREDIT_CARD]);
     const base64EncodedXmlString = btoa(rawXmlString);
     const publicationBody = publicationTools.createRedactedPublicationBody(filename, mimeType, cssId, base64EncodedXmlString);
@@ -187,14 +186,14 @@ export const Home = () => {
   const downloadTestFile = async() => {
     setLoading(true);
     const requestOptions = { method: 'GET', headers: { 'Authorization': `Bearer ${user.access_token}` } };
-    const testBlobId = window.localStorage.getItem("last_blob_id") ? window.localStorage.getItem("last_blob_id") : "48476cb7-3316-421d-b24b-fa9621d8f5a0";
+    const testCssId = window.localStorage.getItem("last_blob_id") ? window.localStorage.getItem("last_blob_id") : "48476cb7-3316-421d-b24b-fa9621d8f5a0";
     try {
-      const response = await fetch(`css-api/v3/files/${testBlobId}`, requestOptions);
+      const response = await fetch(`css-api/v3/files/${testCssId}`, requestOptions);
       const responseJson = await response.json();
       setSelectedFile({ name: responseJson.originalFileName, type: responseJson.mimeType });
       responseJson.mimeType.includes("image") ? setRedactFileEnabled(false) : setRedactFileEnabled(true);
       const publicationBody = publicationTools.createPublicationBody(responseJson.originalFileName, responseJson.mimeType, responseJson.id);
-      setBlobId(responseJson.id);
+      setCssId(responseJson.id);
       const lastPubId = window.localStorage.getItem("last_pub_id");
       if (lastPubId) {
         setPublicationId(lastPubId);
