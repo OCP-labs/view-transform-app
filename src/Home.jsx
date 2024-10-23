@@ -26,6 +26,7 @@ export const Home = () => {
     e.target.value = null;
   }
 
+  // Upload file to CSS and initiate publication request 
   const uploadFile = async(file) => {
     try {
       const formData = new FormData();
@@ -35,11 +36,16 @@ export const Home = () => {
         headers: { 'Authorization': `Bearer ${user.access_token}` },
         body: formData 
       };
+      // Uploading file
       const response = await fetch('css-api/v3/files/fromStream', requestOptions);
       const responseJson = await response.json();
-      const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id);
+      // Saving CSS id for the file
       setBlobId(responseJson.id);
+      const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id);
+
       window.localStorage.setItem("last_blob_id", responseJson.id);
+
+      // Initiate request to Publication Service
       await addNewPublication(publicationBody);
     } catch(error) {
       console.log(error);
@@ -47,6 +53,7 @@ export const Home = () => {
     }
   }
 
+  // TODO: Add a new publication with Transformation / Publication Service
   const addNewPublication = async(publicationBodyJson) => {
     try {
       const requestOptions = { 
@@ -62,6 +69,7 @@ export const Home = () => {
       if (!responseJson.id) {
         throw new Error("Publication failed");
       } else {
+        // Save publication id in order to check when the publication completed
         setPublicationId(responseJson.id);
         window.localStorage.setItem("last_pub_id", responseJson.id);
         setViewFileEnabled(true);
@@ -73,6 +81,7 @@ export const Home = () => {
     }
   }
 
+  // Check when publication is "Complete"
   const getPublicationStatus = async(publicationId, attempts, redactedVersion) => {
     setLoading(true);
     try {
@@ -80,8 +89,11 @@ export const Home = () => {
       const response = await fetch(`api/publication/api/v1/publications/${publicationId}?embed=page_links`, requestOptions);
       const responseJson = await response.json();
       if (responseJson.status === "Complete") {
+        // If we want the redacted version, just download the new document
         if (redactedVersion) {
           await downloadPdf(responseJson, redactedVersion);
+
+        // If we want to load a viewer rendition, then save the entire publication response for use by the Viewing Service JSAPI
         } else {
           setPublicationData(responseJson);
           setLoading(false);
@@ -89,6 +101,8 @@ export const Home = () => {
         }
       } else if (responseJson.status === "Failed") {
         throw new Error("Publication failed");
+
+        // Poll the Transformation / Publication Service until the new publication is complete
       } else {
         attempts++;
         console.log(`Rendition not ready yet. Sending request #${attempts}.`)
@@ -107,6 +121,7 @@ export const Home = () => {
     }
   }
   
+  // Inititiate request for redacted version to the Transformation / Publication Service
   const createRedactedDocument = async() => {
     setLoading(true);
     const filename = selectedFile.name;
@@ -132,6 +147,8 @@ export const Home = () => {
         } else {
           const attempts = 1;
           const redactedVersion = true;
+          
+          // Check when new redacted version is "Complete"
           await getPublicationStatus(responseJson.id, attempts, redactedVersion);
         }
     } catch(error) {
@@ -139,6 +156,7 @@ export const Home = () => {
     }
   }
 
+  // Use download URL from the publication response to download the document from CSS
   const downloadPdf = async(publicationJson, redactedVersion) => {
     const url = publicationTools.getDownloadUrlFromPublication(publicationJson, redactedVersion);
     const index = url.indexOf('v3');
