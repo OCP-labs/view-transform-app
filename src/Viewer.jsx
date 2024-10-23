@@ -8,7 +8,7 @@ export const Viewer = (props) => {
     const VIEWER_ID = "file-viewer-root";
     const FULL_TOOLBAR_NEEDED = true;
 
-    const { publicationData, viewerDisplay, setViewerDisplay } = props;
+    const { publicationData, viewerDisplay, setViewerDisplay, downloadPdf } = props;
     const [ bravaApi, setBravaApi ] = useState();
     const { user } = useAuth();
 
@@ -24,26 +24,6 @@ export const Viewer = (props) => {
     const closeViewer = useCallback(() => {
       setViewerDisplay("none");
     }, [setViewerDisplay]);
-
-    // TODO: Remove redactedVersion flag
-    const downloadPdf = async(publicationJson, redactedVersion) => {
-      const url = getDownloadUrlFromPublication(publicationJson, redactedVersion);
-      const index = url.indexOf('v3');
-      const pathForProxy = url.substring(index);
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Accept': 'application/octet-stream', 'Authorization': `Bearer ${user.access_token}` },
-        responseType: 'blob'
-      };
-      const response = await fetch(`css-api/${pathForProxy}`, requestOptions);
-      const responseBlob = await response.blob();
-      const objectUrl = URL.createObjectURL(responseBlob);
-      const link = document.createElement('a');
-      link.href = objectUrl;
-      link.setAttribute('download', 'Export.pdf');
-      document.body.appendChild(link);
-      link.click();
-    }
 
     useEffect(() => {
       const handleExportDownload = async (e) => {
