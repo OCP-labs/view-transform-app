@@ -13,6 +13,7 @@ export const Home = () => {
   const [ publicationId, setPublicationId ] = useState();
   const [ blobId, setBlobId ] = useState();
   const [ viewFileEnabled, setViewFileEnabled ] = useState(false);
+  const [ redactFileEnabled, setRedactFileEnabled ] = useState(false);
   const [ loading, setLoading ] = useState(false);
 
   const handleFileSelection = async(e) => {
@@ -36,17 +37,13 @@ export const Home = () => {
         headers: { 'Authorization': `Bearer ${user.access_token}` },
         body: formData 
       };
-      // Uploading file
-      const response = await fetch('css-api/v3/files/fromStream', requestOptions);
+      const response = await fetch('css-api/v3/files/fromStream', requestOptions); // Uploading file
       const responseJson = await response.json();
-      // Saving CSS id for the file
-      setBlobId(responseJson.id);
-      const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id);
-
+      setBlobId(responseJson.id); // Saving CSS id for the file
+      const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id); // Create publication body for Brava rendition of file
       window.localStorage.setItem("last_blob_id", responseJson.id);
-
-      // Initiate request to Publication Service
-      await addNewPublication(publicationBody);
+      file.type.includes("image") ? setRedactFileEnabled(false) : setRedactFileEnabled(true);
+      await addNewPublication(publicationBody); // Initiate request to Publication Service
     } catch(error) {
       console.log(error);
       setLoading(false);
@@ -111,7 +108,7 @@ export const Home = () => {
             setTimeout(resolve, delay);
           })
         }
-        await asyncTimeout(500);
+        await asyncTimeout(250);
         return await getPublicationStatus(publicationId, attempts, redactedVersion);
       }
     } catch(error) {
@@ -171,19 +168,16 @@ export const Home = () => {
     const objectUrl = URL.createObjectURL(responseBlob);
     const link = document.createElement('a');
     link.href = objectUrl;
-    let filename = 'Export.pdf';
-    if (redactedVersion) {
-      const createRedactedFilename = (originalFilename) => {
-        const index = originalFilename.lastIndexOf(".");
-        const baseFilename =  originalFilename.substring(0, index);
-        const fileExtension = originalFilename.substring(index);
-        const newBaseFilename = baseFilename + "[REDACTED]";
-        const newFilename = newBaseFilename + fileExtension;
-        return newFilename;
-      }
-      const originalFilename = selectedFile.name;
-      filename = createRedactedFilename(originalFilename);
+    const createRedactedFilename = (originalFilename) => {
+      const index = originalFilename.lastIndexOf(".");
+      const baseFilename =  originalFilename.substring(0, index);
+      const fileExtension = originalFilename.substring(index);
+      const newBaseFilename = baseFilename + "[REDACTED]";
+      const newFilename = newBaseFilename + fileExtension;
+      return newFilename;
     }
+    const originalFilename = selectedFile.name;
+    const filename = createRedactedFilename(originalFilename);
     link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
@@ -198,6 +192,7 @@ export const Home = () => {
       const response = await fetch(`css-api/v3/files/${testBlobId}`, requestOptions);
       const responseJson = await response.json();
       setSelectedFile({ name: responseJson.originalFileName, type: responseJson.mimeType });
+      responseJson.mimeType.includes("image") ? setRedactFileEnabled(false) : setRedactFileEnabled(true);
       const publicationBody = publicationTools.createPublicationBody(responseJson.originalFileName, responseJson.mimeType, responseJson.id);
       setBlobId(responseJson.id);
       const lastPubId = window.localStorage.getItem("last_pub_id");
@@ -237,7 +232,7 @@ export const Home = () => {
             import.meta.env.VITE_TESTING === "true" ?
             <Button sx={{ 
               display: "inline-flex",
-              width: { xs: "40%", sm: "35%", md: "25%", lg: "15%" }, 
+              width: { xs: "40%", sm: "35%", md: "25%", lg: "12%" }, 
             }} 
               variant="contained" 
               component="label" 
@@ -275,7 +270,7 @@ export const Home = () => {
           }} 
             variant="contained" 
             component="label"
-            disabled={!viewFileEnabled}
+            disabled={!redactFileEnabled}
             onClick={createRedactedDocument}
           >
             Redact
