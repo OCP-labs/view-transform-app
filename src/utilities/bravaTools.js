@@ -11,6 +11,8 @@ export const toolbarWithMarkupStuff = {
       { component: 'ZoomWidthButton' },
       { component: 'RotateButton' },
       { component: 'ExportButton', format: 'pdf' },
+      // TODO: add tiff export button
+      { component: 'ExportButton', format: 'tiff' }
     ],
     center: [{ component: 'TitleText' }],
     right: [
@@ -64,6 +66,51 @@ export const pdfExport = {
         title: 'tab.exportGeneral',
         layout: [
           { component: 'FormColumns', fields: ['PageOutput', 'PageSize', 'Orientation', 'Layering', 'OutputIso'] },
+          {
+            component: 'FieldSet',
+            title: 'markup',
+            toggle: 'includeMarkups',
+            layout: [
+              {
+                component: 'FormColumns',
+                fields: ['BurninMarkups', 'AppendComments', 'MarkupsAsComments', 'AppendReasons']
+              }
+            ]
+          }
+        ]
+      },
+      { title: 'tab.exportAction', layout: [{ component: 'FormSection', fields: ['SuccessAction'] }] }
+    ]
+};
+
+// TODO: Add tiff exports
+export const tiffExportDefaults = {
+    successAction: 'download',
+    pagesToExport: 'all',
+    colorConversion: 'original',
+    compressionType: 'lzw',
+    dotsPerInch: 200,
+    bitsPerPixel: 'max24bpp',
+    rotateToOrientation: 'portrait'
+};
+
+export const tiffExport = {
+    submitButtonLabel: 'publish',
+    tabs: [
+      {
+        title: 'tab.exportGeneral',
+        layout: [
+          { component: 'FormColumns', fields: ['PageOutput', 'Orientation', 'Compression', 'DotsPerInch'] },
+          {
+            component: 'FieldSet',
+            title: 'coloring',
+            layout: [
+              {
+                component: 'FormColumns',
+                fields: ['ColorConversion', 'ColorDepth', 'ApplyLineWeights', 'null', 'ForceThinLines']
+              }
+            ]
+          },
           {
             component: 'FieldSet',
             title: 'markup',

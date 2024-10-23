@@ -145,8 +145,7 @@ export const createRedactedPublicationBody = (filename, mimeType, blobId, encode
     return publicationBody;
 }
 
-export const getDownloadUrlFromPublication = (publicationJson, redactedVersion) => {
-    console.log(publicationJson);    
+export const getDownloadUrlFromPublication = (publicationJson, redactedVersion) => {   
     const createDownloadUrl = (obj) => {
       const urlTemplate = redactedVersion ? obj._embedded["pa:get_publication_artifacts"][2]._embedded["ac:get_artifact_content"].urlTemplate : obj._embedded["pa:get_publication_artifacts"][0]._embedded["ac:get_artifact_content"].urlTemplate;
       const id = redactedVersion ? obj._embedded["pa:get_publication_artifacts"][2]._embedded["ac:get_artifact_content"].contentLinks[0].id :  obj._embedded["pa:get_publication_artifacts"][0]._embedded["ac:get_artifact_content"].contentLinks[0].id;
