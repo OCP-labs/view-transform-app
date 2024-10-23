@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from 'react-oidc-context';
 import { Box } from "@mui/material";
 import * as bravaTools from "./utilities/bravaTools";
-//import { getDownloadUrlFromPublication } from "./utilities/publicationTools";
 
 export const Viewer = (props) => {
   const VIEWER_ID = "file-viewer-root";
