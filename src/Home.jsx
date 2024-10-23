@@ -39,8 +39,8 @@ export const Home = () => {
       };
       const response = await fetch('css-api/v3/files/fromStream', requestOptions); // Uploading file
       const responseJson = await response.json();
-      setCssId(responseJson.id); // Saving CSS id for the file
-      const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id); // Create publication body for Brava rendition of file
+      setCssId(responseJson.id); // Saving CSS id of the file
+      const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id); // Publication body for Publication Service to create Viewer version
       window.localStorage.setItem("last_blob_id", responseJson.id);
       file.type.includes("image") ? setRedactFileEnabled(false) : setRedactFileEnabled(true);
       await addNewPublication(publicationBody); // Initiate request to Publication Service
@@ -66,7 +66,7 @@ export const Home = () => {
       if (!responseJson.id) {
         throw new Error("Publication failed");
       } else {
-        // Save publication id in order to check when the publication completed
+        // Save publication id in order to check when the publication has completed
         setPublicationId(responseJson.id);
         window.localStorage.setItem("last_pub_id", responseJson.id);
         setViewFileEnabled(true);
@@ -88,9 +88,10 @@ export const Home = () => {
       if (responseJson.status === "Complete") {
         // If we want the redacted version, just download the new document
         if (redactedVersion) {
-          await downloadPdf(responseJson, redactedVersion);
+          const redactedFilename = createRedactedFilename(selectedFile.name);
+          await downloadFile(responseJson, redactedFilename, redactedVersion);
 
-        // If we want to load a viewer rendition, then save the entire publication response for use by the Viewing Service JSAPI
+        // If we want to load a Viewer version, then save the entire publication response for use by the Viewing Service JSAPI
         } else {
           setPublicationData(responseJson);
           setLoading(false);
@@ -121,11 +122,10 @@ export const Home = () => {
   // Inititiate request for redacted version to the Transformation / Publication Service
   const createRedactedDocument = async() => {
     setLoading(true);
-    const filename = selectedFile.name;
-    const mimeType = selectedFile.type;
+    // Redact SSNs and credit card numbers using Transformation Service macros
     const rawXmlString = publicationTools.createXmlRedactionScript([publicationTools.RedactMacros.SSN, publicationTools.RedactMacros.CREDIT_CARD]);
     const base64EncodedXmlString = btoa(rawXmlString);
-    const publicationBody = publicationTools.createRedactedPublicationBody(filename, mimeType, cssId, base64EncodedXmlString);
+    const publicationBody = publicationTools.createRedactedPublicationBody(selectedFile.name, selectedFile.type, cssId, base64EncodedXmlString);
 
     try {
       const requestOptions = { 
@@ -152,8 +152,17 @@ export const Home = () => {
     }
   }
 
+  const createRedactedFilename = (originalFilename) => {
+    const index = originalFilename.lastIndexOf(".");
+    const baseFilename =  originalFilename.substring(0, index);
+    const fileExtension = originalFilename.substring(index);
+    const newBaseFilename = baseFilename + "[REDACTED]";
+    const newFilename = newBaseFilename + fileExtension;
+    return newFilename;
+  }
+
   // Use download URL from the publication response to download the document from CSS
-  const downloadPdf = async(publicationJson, redactedVersion) => {
+  const downloadFile = async(publicationJson, filename, redactedVersion=false) => {
     const url = publicationTools.getDownloadUrlFromPublication(publicationJson, redactedVersion);
     const index = url.indexOf('v3');
     const pathForProxy = url.substring(index);
@@ -167,16 +176,6 @@ export const Home = () => {
     const objectUrl = URL.createObjectURL(responseBlob);
     const link = document.createElement('a');
     link.href = objectUrl;
-    const createRedactedFilename = (originalFilename) => {
-      const index = originalFilename.lastIndexOf(".");
-      const baseFilename =  originalFilename.substring(0, index);
-      const fileExtension = originalFilename.substring(index);
-      const newBaseFilename = baseFilename + "[REDACTED]";
-      const newFilename = newBaseFilename + fileExtension;
-      return newFilename;
-    }
-    const originalFilename = selectedFile.name;
-    const filename = createRedactedFilename(originalFilename);
     link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
@@ -283,7 +282,7 @@ export const Home = () => {
       }
       </Box>
       <Grid display="flex" justifyContent="center" alignItems="center" size={12}>
-        <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} downloadPdf={downloadPdf} />
+        <Viewer publicationData={publicationData} viewerDisplay={viewerDisplay} setViewerDisplay={setViewerDisplay} downloadFile={downloadFile} />
       </Grid>
     </Box>
   )
