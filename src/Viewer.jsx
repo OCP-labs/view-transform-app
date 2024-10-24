@@ -2,12 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from 'react-oidc-context';
 import { Box } from "@mui/material";
 import * as bravaTools from "./utilities/bravaTools";
+import { getDownloadUrlFromPublication } from "./utilities/publicationTools";
 
 export const Viewer = (props) => {
   const VIEWER_ID = "file-viewer-root";
   const FULL_TOOLBAR_NEEDED = true;
 
-  const { publicationData, viewerDisplay, setViewerDisplay, downloadFile } = props;
+  const { publicationData, viewerDisplay, setViewerDisplay } = props;
   const [ bravaApi, setBravaApi ] = useState();
   const { user } = useAuth();
 
@@ -24,10 +25,22 @@ export const Viewer = (props) => {
     setViewerDisplay("none");
   }, [setViewerDisplay]);
 
-  // Listening for Viewer events - bravaReady, close, and exportSuccess
-  useEffect(() => {
-    const handleExportDownload = async (e) => {
-      console.log(e.detail);
+  const handleExportDownload = async (e) => {
+    console.log(user.access_token);
+    const sessionObject = window.sessionStorage.getItem(`oidc.user:https://us.api.opentext.com/tenants/${import.meta.env.VITE_TENANT_ID}:${import.meta.env.VITE_PUBLIC_CLIENT_ID}`);
+    console.log(JSON.parse(sessionObject).access_token);
+    const newToken = JSON.parse(sessionObject).access_token;
+    const downloadFile = async(publicationJson, redactedVersion=false) => {
+      const url = getDownloadUrlFromPublication(publicationJson, redactedVersion);
+      const index = url.indexOf('v3');
+      const pathForProxy = url.substring(index);
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Accept': 'application/octet-stream', 'Authorization': `Bearer ${newToken}` },
+        responseType: 'blob'
+      };
+      const response = await fetch(`css-api/${pathForProxy}`, requestOptions);
+      const responseBlob = await response.blob();
       let filename;
       const exportType = e.detail.tags[0].bravaView;
       switch(exportType) {
@@ -40,8 +53,19 @@ export const Viewer = (props) => {
         default:
           filename = 'Export.pdf';
       }
-      await downloadFile(e.detail, filename);
+      const objectUrl = URL.createObjectURL(responseBlob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
     }
+    await downloadFile(e.detail);
+  }
+
+
+  // Listening for Viewer events - bravaReady, close, and exportSuccess
+  useEffect(() => {
     const onBravaReady = (e) => {
       window.api = window[e.detail];
       setBravaApi(window.api);
