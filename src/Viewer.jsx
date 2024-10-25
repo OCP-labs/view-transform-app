@@ -2,15 +2,16 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from 'react-oidc-context';
 import { Box } from "@mui/material";
 import * as bravaTools from "./utilities/bravaTools";
-import { getDownloadUrlFromPublication } from "./utilities/publicationTools";
+//import { getDownloadUrlFromPublication } from "./utilities/publicationTools";
 
 export const Viewer = (props) => {
   const VIEWER_ID = "file-viewer-root";
   const FULL_TOOLBAR_NEEDED = true;
 
-  const { publicationData, viewerDisplay, setViewerDisplay } = props;
+  const auth = useAuth();
+  const { publicationData, viewerDisplay, setViewerDisplay, downloadFile } = props;
   const [ bravaApi, setBravaApi ] = useState();
-  const { user } = useAuth();
+  const [ viewerDetail, setViewerDetail ] = useState();
 
   const loadViewer = useCallback(async () => {
     const requestOptions = { method: 'GET' };
@@ -25,22 +26,28 @@ export const Viewer = (props) => {
     setViewerDisplay("none");
   }, [setViewerDisplay]);
 
-  const handleExportDownload = async (e) => {
-    console.log(user.access_token);
-    const sessionObject = window.sessionStorage.getItem(`oidc.user:https://us.api.opentext.com/tenants/${import.meta.env.VITE_TENANT_ID}:${import.meta.env.VITE_PUBLIC_CLIENT_ID}`);
-    console.log(JSON.parse(sessionObject).access_token);
-    const newToken = JSON.parse(sessionObject).access_token;
-    const downloadFile = async(publicationJson, redactedVersion=false) => {
-      const url = getDownloadUrlFromPublication(publicationJson, redactedVersion);
-      const index = url.indexOf('v3');
-      const pathForProxy = url.substring(index);
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Accept': 'application/octet-stream', 'Authorization': `Bearer ${newToken}` },
-        responseType: 'blob'
-      };
-      const response = await fetch(`css-api/${pathForProxy}`, requestOptions);
-      const responseBlob = await response.blob();
+  // Listening for Viewer events - bravaReady and close
+  useEffect(() => {
+    const onBravaReady = (e) => {
+      window.api = window[e.detail];
+      setBravaApi(window.api);
+      console.log(e.detail);
+      setViewerDetail(e.detail);
+    }
+
+    window.addEventListener("bravaReady", onBravaReady);
+    const viewerDiv = document.getElementById(VIEWER_ID);
+    viewerDiv.addEventListener("close", closeViewer);
+    loadViewer();
+    return () => {
+      window.removeEventListener("bravaReady", onBravaReady);
+      viewerDiv.removeEventListener("close", closeViewer);
+    }
+  }, [loadViewer, closeViewer]);
+
+  // Listening for Viewer event - exportSuccess. This useEffect is separate because it depends on token refresh.
+  useEffect(() => {
+    const handleExportDownload = async (e) => {
       let filename;
       const exportType = e.detail.tags[0].bravaView;
       switch(exportType) {
@@ -53,41 +60,19 @@ export const Viewer = (props) => {
         default:
           filename = 'Export.pdf';
       }
-      const objectUrl = URL.createObjectURL(responseBlob);
-      const link = document.createElement('a');
-      link.href = objectUrl;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-    }
-    await downloadFile(e.detail);
-  }
-
-
-  // Listening for Viewer events - bravaReady, close, and exportSuccess
-  useEffect(() => {
-    const onBravaReady = (e) => {
-      window.api = window[e.detail];
-      setBravaApi(window.api);
-      window.addEventListener(e.detail + "-exportSuccess-download", handleExportDownload);
-      console.log(e.detail);
-    }
-    window.addEventListener("bravaReady", onBravaReady);
-    const viewerDiv = document.getElementById(VIEWER_ID);
-    viewerDiv.addEventListener("close", closeViewer);
-    loadViewer();
+      await downloadFile(e.detail, filename);
+    };
+      window.addEventListener(viewerDetail + "-exportSuccess-download", handleExportDownload);
     return () => {
-      window.removeEventListener("bravaReady", onBravaReady);
-      viewerDiv.removeEventListener("close", closeViewer);
-      window.removeEventListener(window.viewDetail + "-exportSuccess-download", handleExportDownload);
+      window.removeEventListener(viewerDetail + "-exportSuccess-download", handleExportDownload);
     }
-  }, [loadViewer, closeViewer]);
+  }, [viewerDetail, auth])
 
   // Configuring the Viewer
   useEffect(() => {
     if (bravaApi) {
       bravaApi.setHttpHeaders({
-        Authorization: `Bearer ${user.access_token}`
+        Authorization: `Bearer ${auth.user.access_token}`
       });
       bravaApi.setScreenBanner(
         "Viewer Service by OpenText | Document Viewed at %Time"
@@ -104,7 +89,7 @@ export const Viewer = (props) => {
       bravaApi.setSearchApiPrefix('highlight/search');
       bravaApi.setMarkupHost(import.meta.env.VITE_API_BASE_URL);
       bravaApi.setPublishingHost(import.meta.env.VITE_API_BASE_URL);
-      bravaApi.setUserName(user.profile.name);
+      bravaApi.setUserName(auth.user.profile.name);
       bravaApi.setScreenWatermark("DevEx Viewer");
   
       bravaApi.setLayout({

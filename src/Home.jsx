@@ -109,7 +109,7 @@ export const Home = () => {
             setTimeout(resolve, delay);
           })
         }
-        await asyncTimeout(250);
+        await asyncTimeout(500);
         return await getPublicationStatus(publicationId, attempts, redactedVersion);
       }
     } catch(error) {
@@ -123,7 +123,8 @@ export const Home = () => {
   const createRedactedDocument = async() => {
     setLoading(true);
     // Redact SSNs and credit card numbers using Transformation Service macros
-    const rawXmlString = publicationTools.createXmlRedactionScript([publicationTools.RedactMacros.SSN, publicationTools.RedactMacros.CREDIT_CARD]);
+    const rawXmlString = publicationTools.createXmlRedactionScript([publicationTools.RedactMacros.SSN, publicationTools.RedactMacros.CREDIT_CARD], ["John Snow"]);
+    console.log(rawXmlString);
     const base64EncodedXmlString = btoa(rawXmlString);
     const publicationBody = publicationTools.createRedactedPublicationBody(selectedFile.name, selectedFile.type, cssId, base64EncodedXmlString);
 
