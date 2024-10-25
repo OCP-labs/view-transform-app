@@ -153,6 +153,5 @@ export const getDownloadUrlFromPublication = (publicationJson, redactedVersion) 
       return url;
     }
     const url = createDownloadUrl(publicationJson);
-    console.log(url);
     return url;
 }

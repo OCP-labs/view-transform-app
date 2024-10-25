@@ -6,7 +6,7 @@ const authConfig = {
     scope: 'openid',
     post_logout_redirect_uri: import.meta.env.VITE_REDIRECT_URI,
     automaticSilentRenew: true,
-    silent_redirect_uri: import.meta.env.VITE_API_REDIRECT_URL,
+    silent_redirect_uri: import.meta.env.VITE_API_REDIRECT_URI,
     onSigninCallback: () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     },
