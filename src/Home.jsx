@@ -86,6 +86,7 @@ export const Home = () => {
       const response = await fetch(`api/publication/api/v1/publications/${publicationId}?embed=page_links`, requestOptions);
       const responseJson = await response.json();
       if (responseJson.status === "Complete") {
+
         // If we want the redacted version, just download the new document
         if (redactedVersion) {
           const redactedFilename = createRedactedFilename(selectedFile.name);
@@ -100,7 +101,7 @@ export const Home = () => {
       } else if (responseJson.status === "Failed") {
         throw new Error("Publication failed");
 
-        // Poll the Transformation / Publication Service until the new publication is complete
+      // Poll the Transformation / Publication Service until the new publication is complete
       } else {
         attempts++;
         console.log(`Rendition not ready yet. Sending request #${attempts}.`)
@@ -122,9 +123,9 @@ export const Home = () => {
   // Inititiate request for redacted version to the Transformation / Publication Service
   const createRedactedDocument = async() => {
     setLoading(true);
+
     // Redact SSNs and credit card numbers using Transformation Service macros
-    const rawXmlString = publicationTools.createXmlRedactionScript([publicationTools.RedactMacros.SSN, publicationTools.RedactMacros.CREDIT_CARD], ["John Snow"]);
-    console.log(rawXmlString);
+    const rawXmlString = publicationTools.createXmlRedactionScript([publicationTools.RedactMacros.SSN, publicationTools.RedactMacros.CREDIT_CARD]);
     const base64EncodedXmlString = btoa(rawXmlString);
     const publicationBody = publicationTools.createRedactedPublicationBody(selectedFile.name, selectedFile.type, cssId, base64EncodedXmlString);
 
