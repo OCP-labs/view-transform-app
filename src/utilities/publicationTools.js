@@ -67,7 +67,7 @@ export const createXmlRedactionScript = (macroObjectsArray, stringsArray=null) =
 }
 
 export const createRedactedPublicationBody = (filename, mimeType, blobId, encodedXmlString) => {
-    const publicationBody = 
+    const redactedPublicationBody = 
     {
         policy: {
             name: "CouldBeAnything",
@@ -142,7 +142,7 @@ export const createRedactedPublicationBody = (filename, mimeType, blobId, encode
             }
         ]
     }
-    return publicationBody;
+    return redactedPublicationBody;
 }
 
 export const getDownloadUrlFromPublication = (publicationJson, redactedVersion) => {   
