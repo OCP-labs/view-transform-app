@@ -5,9 +5,12 @@ This app showcases OpenText's Viewing and Transformation Services. It allows the
 To get started:
 1. Add an .env file to the root folder with the following variables defined:
     * VITE_APP_BASE_URL=
+    * VITE_APP_CSS_URL=
     * VITE_TENANT_ID=
     * VITE_PUBLIC_CLIENT_ID=
     * VITE_REDIRECT_URI=
+   
+   VITE_APP_BASE_URL should be of the form `https://<region>.api.opentext.com` and VITE_APP_CSS_URL should be of the form `https://css.<region>.api.opentext.com`
 2. (Optional) If you would like to test on an already uploaded file, add VITE_TESTING=true to the .env file. This will allow the user to download the last uploaded file rather than uploading a new one.
 3. Run `npm install` to install all dependencies.
 4. Run `npm run dev` to start the app.
