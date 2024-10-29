@@ -216,14 +216,15 @@ export const Home = () => {
         justifyContent: "center", 
         alignItems: "center", 
         flexDirection: "column", 
-        height:"60%", 
+        height: {xs: "70%", md: "60%"}, 
         width: "100%" 
         }}
       >
         <Box sx={{ 
           display: "flex", 
           position: "absolute", 
-          flexDirection: "row", 
+          flexDirection: {xs: "column", md: "row"},
+          gap: { xs: 2, md: 1.5 }, 
           width: "100%",
           justifyContent: "center", 
           alignItems: "center", 
@@ -255,7 +256,7 @@ export const Home = () => {
           <Button sx={{ 
             display: "inline-flex", 
             width: { xs: "40%", sm: "35%", md: "25%", lg: "12%" },
-            margin: "0.5rem"
+            //margin: "0.5rem"
           }} 
             variant="contained" 
             component="label"
@@ -276,9 +277,9 @@ export const Home = () => {
             Redact
           </Button>
         </Box>
-        {loading && <CircularProgress sx={{ position: "relative", top: 50 }} />}
+        {loading && <CircularProgress sx={{ position: "relative", top: {xs: 110, md: 50 } }} />}
         {selectedFile && !loading && 
-        <Box sx={{ position: "relative", top: 50 }} >
+        <Box sx={{ position: "relative", top: { xs: 110, md: 50 } }} >
           <Box sx={{ display: "inline-block", position: "relative" }}>{selectedFile.name}</Box>
         </Box>
       }
