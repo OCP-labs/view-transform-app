@@ -28,7 +28,7 @@ export const Header = () => {
                             }
                         </Grid>
                         <Grid size={{ xs: 4, xl: 1 }}>
-                            <Box sx={{ mt: "1.4rem", fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>Viewer App</Box>
+                            <Box sx={{ mt: "1.4rem", fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>View & Transform</Box>
                         </Grid>
                         <Grid size={{ xs: 6, xl: 10 }}>
                             <Grid container display="flex" justifyContent="flex-end">
