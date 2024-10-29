@@ -100,17 +100,20 @@ export const Viewer = (props) => {
         ],
         tabContainerWithMarkups: bravaTools.createTabContainer(FULL_TOOLBAR_NEEDED),
         markupTools: bravaTools.markupTools,
+        tiffExport: bravaTools.tiffExport,
+        tiffExportDefaults: bravaTools.tiffExportDefaults,
         pdfExport: bravaTools.pdfExport,
         pdfExportActions: bravaTools.pdfExportActions,
         pdfExportDefaults: bravaTools.pdfExportDefaults,
-        tiffExport: bravaTools.tiffExport,
-        tiffExportDefaults: bravaTools.tiffExportDefaults,
-        exportDialogs: ['pdf', 'tiff'],
+        exportDialogs: ['tiff', 'pdf'],
         pageSizeOptions: bravaTools.exportOptions.pageSizeOptions,
         isoOptions: bravaTools.exportOptions.isoOptions,
         orientationOptions: bravaTools.exportOptions.orientationOptions,
         layerOptions: bravaTools.exportOptions.layerOptions,
         pageOutputOptions: bravaTools.exportOptions.pageOutputOptions,
+        compressionOptions: bravaTools.exportOptions.compressionOptions,
+        colorConversionOptions: bravaTools.exportOptions.colorConversionOptions,
+        colorDepthOptions: bravaTools.exportOptions.colorDepthOptions
       });
       bravaApi.addPublication(publicationData, true);
       bravaApi.render(VIEWER_ID); 

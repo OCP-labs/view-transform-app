@@ -10,9 +10,8 @@ export const toolbarWithMarkupStuff = {
       { component: 'ZoomExtentsButton' },
       { component: 'ZoomWidthButton' },
       { component: 'RotateButton' },
+      { component: 'ExportButton', format: 'tiff' },
       { component: 'ExportButton', format: 'pdf' },
-      // TODO: add tiff export button
-      { component: 'ExportButton', format: 'tiff' }
     ],
     center: [{ component: 'TitleText' }],
     right: [
@@ -83,7 +82,6 @@ export const pdfExport = {
     ]
 };
 
-// TODO: Add tiff exports
 export const tiffExportDefaults = {
     successAction: 'download',
     pagesToExport: 'all',
@@ -204,6 +202,31 @@ export const exportOptions = {
         { value: 'all' }, 
         { value: 'visible' }, 
         { value: 'none' }
+    ],
+    coloringOptions: [
+        { value: 'original' }, 
+        { value: 'convertMonochrome' }, 
+        { value: 'convertGrayscale' }
+    ],
+    colorConversionOptions: [
+        { value: 'original' }, 
+        { value: 'convertMonochrome' }, 
+        { value: 'convertGrayscale' }
+    ],
+    compressionOptions: [
+        { value: 'jpg' }, 
+        { value: 'lzw' }, 
+        { value: 'packbits' }, 
+        { value: 'ccitt' }
+    ],
+    colorDepthOptions: [
+        { value: 'force1bpp' },
+        { value: 'max4bpp' },
+        { value: 'force4bpp' },
+        { value: 'max8bpp' },
+        { value: 'force8bpp' },
+        { value: 'max24bpp' },
+        { value: 'force24bpp' }
     ]
 }
   

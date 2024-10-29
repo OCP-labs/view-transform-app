@@ -52,6 +52,7 @@ export const Home = () => {
 
   // TODO: Add a new publication with Transformation / Publication Service
   const addNewPublication = async(publicationBodyJson) => {
+    setLoading(false);
     try {
       const requestOptions = { 
         method: 'POST', 
