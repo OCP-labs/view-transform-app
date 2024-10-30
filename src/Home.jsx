@@ -30,6 +30,7 @@ export const Home = () => {
   // Upload file to CSS and initiate publication request 
   const uploadFile = async(file) => {
     try {
+      setRedactFileEnabled(false);
       const formData = new FormData();
       formData.append('name', file);
       const requestOptions = { 
