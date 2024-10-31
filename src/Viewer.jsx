@@ -98,7 +98,15 @@ export const Viewer = (props) => {
           { component: 'TabContainer', layoutKey: 'tabContainerWithMarkups' },
           { component: 'PageContainer' }
         ],
-        tabContainerWithMarkups: bravaTools.createTabContainer(FULL_TOOLBAR_NEEDED),
+        onSearchClearSetActiveTab: {
+          layoutKey: 'tabContainerWithMarkups',
+          title: 'tab.thumbnails'
+        },
+        onSearchResultsSetActiveTab: {
+          layoutKey: 'tabContainerWithMarkups',
+          title: 'tab.searchResults'
+        },
+        tabContainerWithMarkups: bravaTools.tabContainerWithMarkups,
         markupTools: bravaTools.markupTools,
         tiffExport: bravaTools.tiffExport,
         tiffExportDefaults: bravaTools.tiffExportDefaults,
@@ -106,6 +114,7 @@ export const Viewer = (props) => {
         pdfExportActions: bravaTools.pdfExportActions,
         pdfExportDefaults: bravaTools.pdfExportDefaults,
         exportDialogs: ['tiff', 'pdf'],
+        searchOptions: bravaTools.searchOptions,
         pageSizeOptions: bravaTools.exportOptions.pageSizeOptions,
         isoOptions: bravaTools.exportOptions.isoOptions,
         orientationOptions: bravaTools.exportOptions.orientationOptions,
@@ -118,7 +127,7 @@ export const Viewer = (props) => {
       bravaApi.addPublication(publicationData, true);
       bravaApi.render(VIEWER_ID); 
     }
-  }, [bravaApi, publicationData]);
+  }, [bravaApi, publicationData, auth]);
 
   return (
     <Box

@@ -15,7 +15,9 @@ export const toolbarWithMarkupStuff = {
     ],
     center: [{ component: 'TitleText' }],
     right: [
+      { component: 'SearchTextInput', style: { right: '8em' }, layoutKey: 'searchOptions' },
       { component: 'PageSelector', style: { marginLeft: '0.5em' } },
+      { component: 'SearchToggleButton', size: 20 },
       { component: 'CloseButton', size: 18 }
     ]
 };
@@ -26,22 +28,16 @@ export const tabContainerWithMarkups = {
     tabs: [
         { component: 'ThumbnailPane', title: 'tab.thumbnails' },
         { component: 'MarkupPane', title: 'tab.markups', layoutKey: 'markupTools' },
+        { component: 'SearchResultsPane', title: 'tab.searchResults' },
     ]
 };
 
-export const createTabContainer = (fullToolbarNeeded) => {
-    const tabContainer = {
-        sidebarName: 'tabContainerWithMarkups',
-        primary: 'primary',
-        tabs: [
-            { component: 'ThumbnailPane', title: 'tab.thumbnails' },
-        ]
-    }
-    if (fullToolbarNeeded) {
-        tabContainer.tabs.push({ component: 'MarkupPane', title: 'tab.markups', layoutKey: 'markupTools' });
-    }
-    return tabContainer;
-}
+export const searchOptions = [
+    'MatchCaseOption',
+    'WholeWordOption',
+    'Divider',
+    'IncludeMarkupsOption'
+];
 
 export const pdfExportActions = [
     { id: 'download', default: true, message: 'Download to my browser' }
