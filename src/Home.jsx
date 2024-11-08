@@ -39,12 +39,20 @@ export const Home = () => {
         body: formData 
       };
       const response = await fetch('css-api/v3/files/fromStream', requestOptions); // Uploading file
-      const responseJson = await response.json();
-      setCssId(responseJson.id); // Saving CSS id of the file
-      const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id); // Publication body for Publication Service to create Viewer version
-      window.localStorage.setItem("last_blob_id", responseJson.id);
-      file.type.includes("image") ? setRedactFileEnabled(false) : setRedactFileEnabled(true);
-      await addNewPublication(publicationBody); // Initiate request to Publication Service
+      if (response.status === 401) {
+        const wwwAuthenticateHeader = response.headers.get('WWW-Authenticate');
+        const headerMessage = "An error occurred while attempting to decode the Jwt: JOSE header typ (type) at+jwt not allowed";
+        if (wwwAuthenticateHeader.includes(headerMessage)) {
+          await uploadFile(file);
+        }
+      } else {
+        const responseJson = await response.json();
+        setCssId(responseJson.id); // Saving CSS id of the file
+        const publicationBody = publicationTools.createPublicationBody(file.name, responseJson.mimeType, responseJson.id); // Publication body for Publication Service to create Viewer version
+        window.localStorage.setItem("last_blob_id", responseJson.id);
+        file.type.includes("image") ? setRedactFileEnabled(false) : setRedactFileEnabled(true);
+        await addNewPublication(publicationBody); // Initiate request to Publication Service
+      }
     } catch(error) {
       console.log(error);
       setLoading(false);
