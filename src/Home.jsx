@@ -59,9 +59,8 @@ export const Home = () => {
     }
   }
 
-  // Add a new publication with Transformation / Publication Service
   const addNewPublication = async(publicationBodyJson) => {
-    setLoading(false);
+    // TODO: Add a new publication with Transformation / Publication Service
     try {
       const requestOptions = { 
         method: 'POST', 
