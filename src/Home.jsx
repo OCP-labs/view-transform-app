@@ -174,22 +174,34 @@ export const Home = () => {
 
   // Use download URL from the publication response to download the document from CSS
   const downloadFile = async(publicationJson, filename, redactedVersion=false) => {
-    const url = publicationTools.getDownloadUrlFromPublication(publicationJson, redactedVersion);
-    const index = url.indexOf('v3');
-    const pathForProxy = url.substring(index);
-    const requestOptions = {
-      method: 'GET',
-      headers: { 'Accept': 'application/octet-stream', 'Authorization': `Bearer ${user.access_token}` },
-      responseType: 'blob'
-    };
-    const response = await fetch(`css-api/${pathForProxy}`, requestOptions);
-    const responseBlob = await response.blob();
-    const objectUrl = URL.createObjectURL(responseBlob);
-    const link = document.createElement('a');
-    link.href = objectUrl;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
+    try {
+      const url = publicationTools.getDownloadUrlFromPublication(publicationJson, redactedVersion);
+      const index = url.indexOf('v3');
+      const pathForProxy = url.substring(index);
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Accept': 'application/octet-stream', 'Authorization': `Bearer ${user.access_token}` },
+        responseType: 'blob'
+      };
+      const response = await fetch(`css-api/${pathForProxy}`, requestOptions);
+      if (response.status === 401) {
+        const wwwAuthenticateHeader = response.headers.get('WWW-Authenticate');
+        const headerMessage = "An error occurred while attempting to decode the Jwt: JOSE header typ (type) at+jwt not allowed";
+        if (wwwAuthenticateHeader.includes(headerMessage)) {
+          await downloadFile(publicationJson, filename, redactedVersion);
+        }
+      } else {
+        const responseBlob = await response.blob();
+        const objectUrl = URL.createObjectURL(responseBlob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+      }
+    } catch(error) {
+      console.log(error);
+    }
   }
 
   // Function for downloading previously uploaded file, intended for testing purposes only
