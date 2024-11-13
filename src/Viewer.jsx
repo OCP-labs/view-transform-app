@@ -5,7 +5,6 @@ import * as bravaTools from "./utilities/bravaTools";
 
 export const Viewer = (props) => {
   const VIEWER_ID = "file-viewer-root";
-  const FULL_TOOLBAR_NEEDED = true;
 
   const auth = useAuth();
   const { publicationData, viewerDisplay, setViewerDisplay, downloadFile } = props;
