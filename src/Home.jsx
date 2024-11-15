@@ -61,30 +61,7 @@ export const Home = () => {
 
   const addNewPublication = async(publicationBodyJson) => {
     // TODO: Add a new publication with Transformation / Publication Service
-    try {
-      const requestOptions = { 
-        method: 'POST', 
-        headers: { 
-          'Authorization': `Bearer ${user.access_token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(publicationBodyJson)
-      };
-      const response = await fetch('api/publication/api/v1/publications', requestOptions);
-      const responseJson = await response.json();
-      if (!responseJson.id) {
-        throw new Error("Publication failed");
-      } else {
-        // Save publication id in order to check when the publication has completed
-        setPublicationId(responseJson.id);
-        window.localStorage.setItem("last_pub_id", responseJson.id);
-        setViewFileEnabled(true);
-      }
-    } catch(error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(false); // Remove this line when completing Exercise 4
   }
 
   // Check when publication is "Complete"
